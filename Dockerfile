@@ -17,11 +17,11 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 RUN git clone https://github.com/sheester/SIMsalabim-web.git
 
-install the streamlit app
-WORKDIR web-SIMsalabim-main
+#install the streamlit app
+WORKDIR SIMsalabim-web
 RUN git clone https://github.com/kostergroup/SIMsalabim.git
 
-# install compile SIMsalabim and save default parameters to revert to
+# install compile SIMsalabim # and save default parameters to revert to
 COPY . .
 WORKDIR SIMsalabim/SimSS
 RUN fpc simss.pas

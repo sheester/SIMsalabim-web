@@ -1,5 +1,5 @@
 #!/bin/bash
 nginx -t
 service nginx start
-cd src
+cd SIMsalabim-web
 streamlit run app.py
