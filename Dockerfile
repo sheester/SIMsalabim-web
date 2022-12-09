@@ -15,20 +15,20 @@ RUN apt-get clean && apt-get autoclean && apt-get autoremove
 RUN rm -rf /var/lib/apt/lists/*
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# RUN git clone https://github.com/Mkoopm/plot-SIMsalabim.git
+RUN git clone https://github.com/sheester/SIMsalabim-web.git
 
-# install the streamlit app
-# WORKDIR web-SIMsalabim-main
-# RUN git clone https://github.com/kostergroup/SIMsalabim.git
+install the streamlit app
+WORKDIR web-SIMsalabim-main
+RUN git clone https://github.com/kostergroup/SIMsalabim.git
 
 # install compile SIMsalabim and save default parameters to revert to
 COPY . .
-WORKDIR /src/SIMsalabim/SimSS
+WORKDIR SIMsalabim/SimSS
 RUN fpc simss.pas
 # RUN cp device_parameters.txt device_parameters_backup.txt
 
 # install requirements for the strealit app
-WORKDIR ../../..
+WORKDIR ../..
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
