@@ -1,0 +1,45 @@
+@media (prefers-color-scheme: light) { 
+    .st-cb {
+            color:rgb(49, 51, 63)
+            }
+    .st-dk {
+            -webkit-text-fill-color: rgb(49, 51, 63)
+            }
+    .st-dq {
+            -webkit-text-fill-color: rgb(49, 51, 63)
+            }
+    }
+
+@media (prefers-color-scheme: dark) { 
+        .st-cb {
+                color:white
+                }
+        .st-dq {
+                -webkit-text-fill-color: white
+                }
+        .st-dk {
+                -webkit-text-fill-color: white
+                }
+    }
+
+[data-testid=column] [data-testid=stVerticalBlock]{
+    gap: 0.1rem;
+}
+
+.st-cb {
+    cursor: text ;
+}
+
+.streamlit-expanderHeader {
+    margin-left:2%
+}
+
+.streamlit-expanderHeader p {
+    font-size: x-large;
+    cursor: pointer;
+}
+
+.streamlit-expanderContent {
+    margin-left: 3%;
+    margin-right: 3%;
+}
