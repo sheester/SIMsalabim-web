@@ -75,15 +75,16 @@ def create_band_energy_diagram(param):
     energy = [CB, VB, WL, WR, CBLTL, CBRTL, VBLTL, VBRTL]
 
     # Set a threshold width for bands to remain visible. Threshold is 10% of the total device width
-    if LLTL < 0.1*L:
-        LLTL = 0.1*L
-    if LRTL < 0.1*L:
-        LRTL=0.1*L
-    if (L-LLTL-LRTL) < 0.1*L:
-        frac=LLTL/LRTL
-        L_diff = 0.1*L-(L-LLTL-LRTL)
-        LLTL = LLTL - L_diff*frac
-        LRTL = LRTL - L_diff*(1/frac)
+    if not LLTL == 0 and not LRTL == 0:
+        if LLTL < 0.1*L:
+            LLTL = 0.1*L
+        if LRTL < 0.1*L:
+            LRTL=0.1*L
+        if (L-LLTL-LRTL) < 0.1*L:
+            frac=LLTL/LRTL
+            L_diff = 0.1*L-(L-LLTL-LRTL)
+            LLTL = LLTL - L_diff*frac
+            LRTL = LRTL - L_diff*(1/frac)
 
     # Electrode width configuration
     electrode_width_fraction = 0.1  # Added fraction of the total device width
@@ -110,6 +111,8 @@ def create_band_energy_diagram(param):
         left_transport_layer, p_origin_layer = create_rectangle_patch(
             CBLTL, VBLTL, energy_offset,  energy_step_size, p_origin_ltl, LLTL, total_width_step_size, '#AF312E', size, ax)
         ax.add_patch(left_transport_layer)
+    else:
+        p_origin_layer = p_origin_ltl
 
     # Layer 1
     layer_1, p_origin_rtl = create_rectangle_patch(
@@ -121,7 +124,8 @@ def create_band_energy_diagram(param):
         right_transport_layer, p_origin_right_electrode = create_rectangle_patch(
             CBRTL, VBRTL, energy_offset, energy_step_size, p_origin_rtl, LRTL, total_width_step_size, '#95B2DA', size, ax)
         ax.add_patch(right_transport_layer)
-
+    else:
+        p_origin_right_electrode = p_origin_rtl
     # Right Electrode
     right_electrode, p_end = create_rectangle_patch(
         WR, WR, energy_offset, energy_step_size, p_origin_right_electrode, electrode_width_fraction*size*total_width_step_size, total_width_step_size, 'k', size, ax)
@@ -131,7 +135,6 @@ def create_band_energy_diagram(param):
     # plt.show()
     # plt.savefig('./figures/band_diagram.png')
     return fig
-
 
 if __name__ == '__main__':
     # TEMP parameters for testing

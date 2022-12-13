@@ -1,7 +1,10 @@
 import streamlit as st
+import os
+import shutil
 from subprocess import run,PIPE
 from utils import helper_functions as hf
 from utils import draw_band_diagram as dbd
+from datetime import datetime, timezone
 
 # Page configuration
 st.set_page_config(layout="wide", page_title="SIMsalabim device parameters")
@@ -25,23 +28,61 @@ local_css('./utils/style.css')
 def run_simss():
     with st.spinner('SIMulating...'):
         # Temp code to show console output on browser
-        result = run('./simss', cwd=SimSS_path, stdout=PIPE)
+        result = run(['./simss', 'device_parameters_' + str(st.session_state['id']) + '.txt'], cwd=SimSS_path, stdout=PIPE)
     if result.returncode != 0:
         # st.error('SIMsalabim raised an error')
         result_decode = result.stdout.decode('utf-8')
         st.error('Errocode: ' + str(result.returncode) +'\n\n'+result_decode)
     else:
         st.success('Simulation complete')
+        
+        # Move files to a id specific folder
+        dir_name=str(st.session_state['id'])
+        # If folder does not exist yet, create it
+        if not os.path.exists(SimSS_path + dir_name):
+            os.makedirs(SimSS_path + dir_name)
+        
+        # Verify again of folder has been created correctly to prevent write issues.
+        if os.path.exists(SimSS_path + dir_name):
+            for item in os.listdir(SimSS_path):
+                if str(st.session_state['id']) in item:
+                    if not 'device_parameters' in item:
+                        # copy to id folder and remove files from main folder
+                        if os.path.isfile(SimSS_path + dir_name + '/' + item):
+                            os.remove(SimSS_path + dir_name + '/' + item)
+                        shutil.move(SimSS_path + item,SimSS_path + dir_name)
+                    else:
+                        # Only copy file to id folder but leave a copy in the main folder
+                        if os.path.isfile(SimSS_path + dir_name + '/' + item):
+                            os.remove(SimSS_path + dir_name + '/' + item)
+                        shutil.copy(SimSS_path + item,SimSS_path + dir_name)
 
 def save_parameters():
-    par_file = hf.write_to_txt(dev_par_object)
+    # Create id for session, currently the timestamp
+    id = st.session_state['id']
+    filename = 'device_parameters_' + str(id) + '.txt'
     
+    # Add identifier to output files
+    for item in dev_par_object[10]:
+        if (item[0]=='par'):
+            if '.dat' in item[2]:
+                split_par_name = item[2].split('.dat')
+                item[2]=split_par_name[0]+'_'+ str(id) + '.dat'
+            if item[2]== 'log.txt':
+                item[2]= 'log_' + str(id) + '.txt'
+
+    par_file = hf.write_to_txt(dev_par_object)
+
     # Open the device_parameters file and write content of par_file to it. Close the file afterwards.
-    with open(SimSS_path+'device_parameters.txt', 'w') as fp:
+    # with open(SimSS_path+'device_parameters.txt', 'w') as fp:
+
+    with open(SimSS_path+filename, 'w') as fp:
         fp.write(par_file)
         fp.close()
         # Draw the band diagram
     get_param_band_diagram(dev_par_object)
+    # return timestamp_now
+
 
 def close_figure():
     # Close the band diagram containers
@@ -82,10 +123,10 @@ def get_param_band_diagram(dev_par_object):
             st.markdown('''<em>Note: Band diagram is not to scale</em>''',unsafe_allow_html=True)
 
 #Initialeze but do not render the plot containers
-with plot_container_title.container():
-        plot_container_title.empty()
-with plot_container.container():
-        plot_container.empty()
+# with plot_container_title.container():
+#         plot_container_title.empty()
+# with plot_container.container():
+#         plot_container.empty()
 
 with st.sidebar: 
     st.button('Save device parameters', on_click=save_parameters)
@@ -138,7 +179,10 @@ with placeholder.container():
                             st.text_input(item[1], value=item[1], disabled=True, label_visibility="collapsed")
                             # st.code(item[1],language='markdown')
                         with col_val :
-                            item[2] = st.text_input(item[1] + '_val', value=item[2], label_visibility="collapsed")
+                            if item[1]== 'Pause_at_end':
+                                item[2] = st.text_input(item[1] + '_val', value=item[2],disabled=True, label_visibility="collapsed")
+                            else:
+                                item[2] = st.text_input(item[1] + '_val', value=item[2], label_visibility="collapsed")
                         with col_desc :
                             st.text_input(item[1] +'_desc', value=item[3], disabled=True, label_visibility="collapsed")
 #st.success('Done!')
