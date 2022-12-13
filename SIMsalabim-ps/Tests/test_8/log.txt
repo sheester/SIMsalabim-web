@@ -1,0 +1,6 @@
+Version 4.38
+Size of reals used in simulation: 10 bytes
+Values from command line:
+accDens = 1
+tVG_file = tVG_grof.txt
+0 did not converge.

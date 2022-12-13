@@ -1,0 +1,17 @@
+Version 4.38
+Size of reals used in simulation: 10 bytes
+
+Messages from main solver at time = 0.220188:
+Overall convergence: FALSE
+Iterations perfomed: 300
+Poisson solver status:
+- delV =1.8519E-18
+- converged: TRUE
+Main loop status:
+- current converged: FALSE
+- error on current: -1.1640E-10
+- error decreasing: FALSE
+- current is sufficiently uniform: FALSE
+- current smaller than MinAbsJDark: FALSE
+- relative change smaller MinRelChange: TRUE
+
