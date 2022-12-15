@@ -1,2 +1,8 @@
 /SIMsalabim version
 /figures
+/SIMsalabim/SimSS/*
+!/SIMsalabim/SimSS/simms*
+/SIMsalabim/SimSS/*.txt
+/SIMsalabim/SimSS/*.dat
+!/SIMsalabim/SimSS/device_parameters.txt
+*.zip

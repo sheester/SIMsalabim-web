@@ -95,7 +95,7 @@ def create_band_energy_diagram(param):
     """    
 
     fig, ax = plt.subplots()
-    print(param['L_LTL'])
+    
     # Read parameters
     L = float(param["L"])
     LLTL = float(param["L_LTL"])

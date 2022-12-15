@@ -2,33 +2,32 @@ import streamlit as st
 import os
 import shutil
 from subprocess import run,PIPE
-from utils import helper_functions as hf
+from utils import parameter_functions as hf
 from utils import draw_band_diagram as dbd
-from datetime import datetime, timezone
+from utils import general_functions as gf
 
 # Page configuration
-st.set_page_config(layout="wide", page_title="SIMsalabim device parameters")
+st.set_page_config(layout="wide", page_title="SIMsalabim device parameters", page_icon='./logo/SIMsalabim_logo_HAT.jpg')
 
 # Parameters
+id = str(st.session_state['id'])
 SimSS_path = 'SIMsalabim/SimSS/'
 placeholder = st.empty()
 plot_container_title = st.empty()
 plot_container = st.empty()
 dev_par_object = []
 
-# Load custom CSS to reduce whitespace between rows in columns. Convert disbaled greyed text back to either white or black.
-
-def local_css(file_name):
-    with open(file_name) as f:
-        st.markdown(f'<style>{f.read()}</style>',unsafe_allow_html=True)
-
-local_css('./utils/style.css')
+# Load custom CSS
+gf.local_css('./utils/style.css')
 
 # Functions             
 def run_simss():
+    """Run the SIMsalabim simulation executable. When an errocode is returned, display it on the screen. 
+        When success, copy results, including zip to folder.
+    """    
     with st.spinner('SIMulating...'):
         # Temp code to show console output on browser
-        result = run(['./simss', 'device_parameters_' + str(st.session_state['id']) + '.txt'], cwd=SimSS_path, stdout=PIPE)
+        result = run(['./simss', 'device_parameters_' + str(id) + '.txt'], cwd=SimSS_path, stdout=PIPE)
     if result.returncode != 0:
         # st.error('SIMsalabim raised an error')
         result_decode = result.stdout.decode('utf-8')
@@ -37,7 +36,7 @@ def run_simss():
         st.success('Simulation complete')
         
         # Move files to a id specific folder
-        dir_name=str(st.session_state['id'])
+        dir_name=str(id)
         # If folder does not exist yet, create it
         if not os.path.exists(SimSS_path + dir_name):
             os.makedirs(SimSS_path + dir_name)
@@ -45,7 +44,7 @@ def run_simss():
         # Verify again of folder has been created correctly to prevent write issues.
         if os.path.exists(SimSS_path + dir_name):
             for item in os.listdir(SimSS_path):
-                if str(st.session_state['id']) in item:
+                if str(id) in item:
                     if not 'device_parameters' in item:
                         # copy to id folder and remove files from main folder
                         if os.path.isfile(SimSS_path + dir_name + '/' + item):
@@ -56,10 +55,13 @@ def run_simss():
                         if os.path.isfile(SimSS_path + dir_name + '/' + item):
                             os.remove(SimSS_path + dir_name + '/' + item)
                         shutil.copy(SimSS_path + item,SimSS_path + dir_name)
+            # Create a ZIP file from the results and move to the id folder
+            shutil.make_archive('simulation_results_' + str(id) , 'zip', SimSS_path + str(id))
+            shutil.move('simulation_results_' + str(id) + '.zip', SimSS_path + str(id))
 
 def save_parameters():
-    # Create id for session, currently the timestamp
-    id = st.session_state['id']
+    """Update output parameter file naming with id and write to txt file.
+    """    
     filename = 'device_parameters_' + str(id) + '.txt'
     
     # Add identifier to output files
@@ -85,11 +87,20 @@ def save_parameters():
 
 
 def close_figure():
+    """CLose the band diagram manually.
+    """    
     # Close the band diagram containers
     plot_container = st.empty
     plot_container_title = st.empty
 
 def get_param_band_diagram(dev_par_object): 
+    """Create and display the band diagram based on the relevant parameters from the dict object
+
+    Parameters
+    ----------
+    dev_par_object : dict
+        Dictionary with all data
+    """    
     # A fixed list of parameters must be supplied to create the band diagram.
     plot_param = {}
     plot_param_keys = ['L','L_LTL','L_RTL','CB','VB','W_L','W_R','CB_LTL','CB_RTL','VB_LTL','VB_RTL']
@@ -122,12 +133,6 @@ def get_param_band_diagram(dev_par_object):
         with col_plot_3:
             st.markdown('''<em>Note: Band diagram is not to scale</em>''',unsafe_allow_html=True)
 
-#Initialeze but do not render the plot containers
-# with plot_container_title.container():
-#         plot_container_title.empty()
-# with plot_container.container():
-#         plot_container.empty()
-
 with st.sidebar: 
     st.button('Save device parameters', on_click=save_parameters)
 
@@ -157,9 +162,8 @@ with placeholder.container():
         if par_section[0]=='Description':
             # Version number
             version=[i for i in par_section if i[1].startswith('version:')]
-            # Add version number (from device parameters file) to sidebar
-            with st.sidebar:
-                st.write("SIMsalabim " + version[0][1])
+            # Add version number (from device parameters file)
+            st.write("SIMsalabim " + version[0][1])
             # Reference to the SIMsalabim manual
             st.write("""For more information about the device parameters or SIMsalabim itself, refer to the 
                             [Manual](https://raw.githubusercontent.com/kostergroup/SIMsalabim/master/Docs/Manual.pdf)""")
@@ -186,3 +190,8 @@ with placeholder.container():
                         with col_desc :
                             st.text_input(item[1] +'_desc', value=item[3], disabled=True, label_visibility="collapsed")
 #st.success('Done!')
+
+#  SIMsalabim logo
+with st.sidebar:
+    st.markdown('<hr>',unsafe_allow_html=True)
+    st.image('./logo/SIMsalabim_logo_cut_trans.png')
