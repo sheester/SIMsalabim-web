@@ -8,6 +8,15 @@
     .st-dq {
             -webkit-text-fill-color: rgb(49, 51, 63)
             }
+    th{
+        color: black !important;
+        font-size: 1.2rem !important;
+        background-color: rgba(49, 51, 63, 0.05) !important;
+    }
+    td{
+        color: black !important;
+        font-size: 1.2rem !important
+    }
     }
 
 @media (prefers-color-scheme: dark) { 
@@ -20,6 +29,15 @@
         .st-dk {
                 -webkit-text-fill-color: white
                 }
+        th{
+            color: white !important;
+            font-size: 1.2rem !important;
+            background-color: white !important;
+        }
+        td{
+            color: white !important;
+            font-size: 1.2rem !important
+        }
     }
 
 [data-testid=column] [data-testid=stVerticalBlock]{
@@ -68,3 +86,8 @@ li {
 input {
     font-size: 1.2rem !important;
 }
+
+/* th{
+    color: black !important;
+    font-size: 1.2rem !important
+} */

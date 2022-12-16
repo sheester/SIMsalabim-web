@@ -174,3 +174,83 @@ def read_comment_line(line, index):
     else:
         changes = True
     return index,changes
+
+def split_line_scpars(item, solar_cell_param, par, unit):
+    """Read string line and split into the different parameters (Simualted, Experimental, Deviation)
+
+    Parameters
+    ----------
+    item : string
+        Parameter line
+    solar_cell_param : dict
+        Dict to hold the solar cell parameters
+    par : string
+        Paramemeter name
+    unit : string
+        Unit of the parameter
+
+    Returns
+    -------
+    solar_cell_param : dict
+        Updated Dict to hold the solar cell parameters
+    """    
+    fact = 1
+    # Remove the parameter name
+    item = item.replace(par + ':','')
+    # If not already done, remove the unit
+    if not par== 'Jsc' and not par == 'FF' and not par == 'MPP':
+        item = item.replace(unit,'')
+    # Set the sclaing factor for Jsc to convert to mAcm-2
+    if par == 'Jsc':
+        fact = 10
+    # Place the units in square brackets 
+    if not par == 'FF':
+        unit = '[' + unit +']'
+    val_list=item.split(' ')
+    i=0
+    val_list_compact=[]
+    for val_list_split in val_list:
+        if not val_list_split == '':
+            val_list_compact.append(val_list_split)
+    for i in val_list_compact:
+        if len(val_list_compact)>0:
+            solar_cell_param['Simulated'][par + ' ' + unit] = (str(float(val_list_compact[0])/fact))+val_list_compact[1]+(str(float(val_list_compact[2])/fact))
+        if len (val_list_compact) > 3:
+            solar_cell_param['Experimental'][par + ' ' + unit] = (str(float(val_list_compact[3])/fact))+val_list_compact[4]+(str(float(val_list_compact[5])/fact))
+        if len (val_list_compact) > 5:
+            solar_cell_param['Deviation'][par + ' ' + unit] = (str(float(val_list_compact[6])/fact))
+    return solar_cell_param
+
+def write_scpars(item, solar_cell_param, solar_cell):
+    """Read the solar cell parameters from the txt line based on a RegExp pattern. Store them in a dictionary.
+
+    Parameters
+    ----------
+    item : string
+        String containing a solar cell parameter
+    solar_cell_param : dict
+        The dict object to hold the solar cell parameters
+
+    Returns
+    -------
+    dict
+        Updated dict object to hold the solar cell parameters
+    """
+    if 'Jsc' in item:
+        item = item.replace('A/m2','')
+        solar_cell_param = split_line_scpars(item, solar_cell_param,'Jsc', 'mAcm\u207b\u00b2' )
+        solar_cell = True
+    if 'Vmpp' in item:
+        solar_cell_param = split_line_scpars(item, solar_cell_param,'Vmpp', 'V' )
+        solar_cell = True     
+    if 'MPP' in item:
+        item = item.replace('W/m2','')
+        solar_cell_param = split_line_scpars(item, solar_cell_param,'MPP', 'Wm\u207b\u00b2' )
+        solar_cell = True     
+    if 'Voc' in item:
+        solar_cell_param = split_line_scpars(item, solar_cell_param,'Voc', 'V' )
+        solar_cell = True     
+    if 'FF' in item:
+        solar_cell_param = split_line_scpars(item, solar_cell_param,'FF', '' )
+        solar_cell = True      
+    return solar_cell_param,solar_cell

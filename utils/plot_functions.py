@@ -40,7 +40,7 @@ def create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, xl
     return ax
 
 # JV-curve
-def plot_jv_curve(data, choice_voltage, plot_funcs, ax ):
+def plot_jv_curve(data, choice_voltage, plot_funcs, ax, exp, data_exp='' ):
     """Make a plot of the JV curve
 
     Parameters
@@ -53,17 +53,29 @@ def plot_jv_curve(data, choice_voltage, plot_funcs, ax ):
         Type of plot
     ax : axes
         Axes object for the plot
-
+    exp : boolean
+        True if experimental JV curve needs to be plotted.
+    data_exp : DataFrame
+        Optional argument when an experimental JV curve is supplied
     Returns
     -------
     axes
         Updated Axes object for the plot
     """    
-    plot_funcs(data=data, x='Vext', y="Jext", ax=ax)
+    data['Jext']=data['Jext']/1e1
+    plot_funcs(data=data, x='Vext', y="Jext", ax=ax, label='Simulated')
     ax.axvline(choice_voltage, color='k', linestyle='--')
     ax.set_xlabel('V$\mathrm{_{ext}}$ [V]')
-    ax.set_ylabel('J$\mathrm{_{ext}}$ [Am$^{-3}$]')
+    ax.set_ylabel('J$\mathrm{_{ext}}$ [mAcm$^{-2}$]')
     ax.set_title('Current-voltage characteristic')
+    if exp == True:
+        data_exp['J'] = data_exp['J']/1e1
+        plot_funcs(data=data_exp, x='V', y='J', ax=ax, label='Experimental')
+        ax.legend()
+    if exp == False:
+        ax.get_legend().remove()
+    ax.axhline(y=0, color='gray', linewidth=0.5)
+    ax.axvline(x=0, color='gray', linewidth=0.5)
     return ax
 
 
@@ -259,6 +271,8 @@ def plot_currents(data_var, choice_voltage, plot_funcs, ax, color):
     """   
     par=['Jn','Jp','Jtot']
     labels = ['J$_{\mathrm{n}}$', 'J$_{\mathrm{p}}$', 'J$_{\mathrm{tot}}$']
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Current [Am$^{-3}$]','linear', color)
+    for item in par:
+        data_var[item]=data_var[item]/1e1
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Current density [mAcm$^{-2}$]','linear', color)
     ax.set_title('Currents')
     return ax

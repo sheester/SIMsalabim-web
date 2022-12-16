@@ -12,10 +12,16 @@ st.set_page_config(layout="wide", page_title="SIMsalabim device parameters", pag
 # Parameters
 id = str(st.session_state['id'])
 SimSS_path = 'SIMsalabim/SimSS/'
+output_path = 'Simulations/'
 placeholder = st.empty()
 plot_container_title = st.empty()
 plot_container = st.empty()
 dev_par_object = []
+solar_cell_param={'Simulated':{'Jsc':0, 'Vmpp':0, 'MPP':0, 'Voc':0, 'FF':0},
+                    'Experimental':{},
+                    'Deviation':{}}
+
+st.session_state.key='scpars'
 
 # Load custom CSS
 gf.local_css('./utils/style.css')
@@ -27,58 +33,80 @@ def run_simss():
     """    
     with st.spinner('SIMulating...'):
         # Temp code to show console output on browser
-        result = run(['./simss', 'device_parameters_' + str(id) + '.txt'], cwd=SimSS_path, stdout=PIPE)
+        result = run(['./simss', '../../' + output_path + str(id) + '/' + 'device_parameters_' + str(id) + '.txt'], cwd=SimSS_path, stdout=PIPE)
+        # console_decoded = result.stdout.decode('utf-8')
     if result.returncode != 0:
         # st.error('SIMsalabim raised an error')
         result_decode = result.stdout.decode('utf-8')
         st.error('Errocode: ' + str(result.returncode) +'\n\n'+result_decode)
     else:
         st.success('Simulation complete')
-        
+
+        console_decoded = result.stdout.decode('utf-8')
+
+        # Initialize the solar cell parameter object. Set <NA> values for the simulation dict to setup all the avaialble rows
+        solar_cell_param={'Simulated':{'Jsc [mAcm\u207b\u00b2]':'<NA>', 'Vmpp [V]':'<NA>', 'MPP [Wm\u207b\u00b2]':'<NA>', 'Voc [V]':'<NA>', 'FF ':'<NA>'},
+                    'Experimental':{},
+                    'Deviation':{}}
+
+        solar_cell = False
+        for item in console_decoded.split('\n'):
+            solar_cell_param,solar_cell = hf.write_scpars(item,solar_cell_param,solar_cell)
+        for item in dev_par_object[10]:
+            if (item[1]=='ExpJV'):
+                st.session_state['expJV_filename'] = item[2]
+        if solar_cell == False:
+            st.session_state['expJV_filename']=''
+            solar_cell_param = {}
+        st.session_state['scpars']=solar_cell_param
         # Move files to a id specific folder
-        dir_name=str(id)
+        dir_path=output_path + str(id)
         # If folder does not exist yet, create it
-        if not os.path.exists(SimSS_path + dir_name):
-            os.makedirs(SimSS_path + dir_name)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         
         # Verify again of folder has been created correctly to prevent write issues.
-        if os.path.exists(SimSS_path + dir_name):
+        if os.path.exists(dir_path):
             for item in os.listdir(SimSS_path):
+                file_path = dir_path + '/' + item
                 if str(id) in item:
-                    if not 'device_parameters' in item:
-                        # copy to id folder and remove files from main folder
-                        if os.path.isfile(SimSS_path + dir_name + '/' + item):
-                            os.remove(SimSS_path + dir_name + '/' + item)
-                        shutil.move(SimSS_path + item,SimSS_path + dir_name)
-                    else:
                         # Only copy file to id folder but leave a copy in the main folder
-                        if os.path.isfile(SimSS_path + dir_name + '/' + item):
-                            os.remove(SimSS_path + dir_name + '/' + item)
-                        shutil.copy(SimSS_path + item,SimSS_path + dir_name)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                    shutil.move(SimSS_path + item,dir_path)
             # Create a ZIP file from the results and move to the id folder
-            shutil.make_archive('simulation_results_' + str(id) , 'zip', SimSS_path + str(id))
-            shutil.move('simulation_results_' + str(id) + '.zip', SimSS_path + str(id))
+            shutil.make_archive('simulation_results_' + str(id) , 'zip', dir_path)
+            zip_file_name = 'simulation_results_' + str(id) + '.zip'
+            # If the ZIP archive already exists for this id in the id folder, remove it first.
+            if os.path.isfile(output_path + zip_file_name):
+                os.remove(output_path + zip_file_name)
+            shutil.move(zip_file_name, output_path)
 
 def save_parameters():
     """Update output parameter file naming with id and write to txt file.
     """    
     filename = 'device_parameters_' + str(id) + '.txt'
-    
+
     # Add identifier to output files
     for item in dev_par_object[10]:
         if (item[0]=='par'):
-            if '.dat' in item[2]:
+            if '.dat' in item[2] and not str(id) in item[2]:
                 split_par_name = item[2].split('.dat')
                 item[2]=split_par_name[0]+'_'+ str(id) + '.dat'
             if item[2]== 'log.txt':
                 item[2]= 'log_' + str(id) + '.txt'
+            
 
     par_file = hf.write_to_txt(dev_par_object)
 
-    # Open the device_parameters file and write content of par_file to it. Close the file afterwards.
-    # with open(SimSS_path+'device_parameters.txt', 'w') as fp:
+    # Move files to a id specific folder
+    dir_path=output_path + str(id)
+    # If folder does not exist yet, create it
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
 
-    with open(SimSS_path+filename, 'w') as fp:
+    # Open the device_parameters file and write content of par_file to it. Close the file afterwards.
+    with open(dir_path +'/'+filename, 'w') as fp:
         fp.write(par_file)
         fp.close()
         # Draw the band diagram
@@ -135,18 +163,30 @@ def get_param_band_diagram(dev_par_object):
 
 with st.sidebar: 
     st.button('Save device parameters', on_click=save_parameters)
+    if os.path.isfile(output_path + str(id) + '/' + 'device_parameters_' + str(id) + '.txt'):
+        with open(output_path + str(id) + '/' +'device_parameters_' + str(id) + '.txt') as fo:
+            st.download_button('Download device parameters', fo, file_name='device_parameters_' + str(id) + '.txt')
+            fo.close()
+    else: 
+         with open(SimSS_path+'device_parameters.txt') as fo:
+            st.download_button('Download device parameters', fo, file_name="device_parameters.txt")
+            fo.close()
 
-    with open(SimSS_path+'device_parameters.txt') as fo:
-        st.download_button('Download device parameters', fo, file_name="device_parameters.txt")
-        fo.close()
-    
     reset_device_parameters = st.button('Reset device parameters to default')
     st.button('Run SimSS', on_click=run_simss)
 
-# Read the device_parameters.txt file and create a List object
-with open(SimSS_path+'device_parameters.txt') as fp:
-    dev_par_object = hf.read_from_txt(fp)
-    fp.close()
+# Load the device_parameters file and create a List object. 
+# Check if a session specific file already exists. If True, use this one, else return to the default device_parameters.txt
+if os.path.isfile(output_path + str(id) + '/' + 'device_parameters_' + str(id) + '.txt'):
+    # Session specific parameter file
+    with open(output_path + str(id) + '/' + 'device_parameters_' + str(id) + '.txt') as fp:
+        dev_par_object = hf.read_from_txt(fp)
+        fp.close()
+else:
+    # Default parameter file
+    with open(SimSS_path+'device_parameters.txt') as fp:
+        dev_par_object = hf.read_from_txt(fp)
+        fp.close()
 
 # WHen the reset button is pressed, empty the container and create a List object from the default .txt file. Next, save the default parameters to the parameter file.
 if reset_device_parameters:
