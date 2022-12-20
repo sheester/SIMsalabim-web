@@ -161,6 +161,56 @@ def get_param_band_diagram(dev_par_object):
         with col_plot_3:
             st.markdown('''<em>Note: Band diagram is not to scale</em>''',unsafe_allow_html=True)
 
+def upload_expJV():
+    data = uploaded_file.getvalue().decode('utf-8')
+
+    target_path = SimSS_path + uploaded_file.name
+
+    destination_file = open(target_path, "w")
+    destination_file.write(data)
+    destination_file.close()
+    return st.success('File upload complete')
+
+import re
+from werkzeug.utils import secure_filename
+
+with st.sidebar: 
+    chk_expJVcurve = st.checkbox("Upload experimental current voltage characteristic")
+    if chk_expJVcurve:
+        uploaded_file = st.file_uploader("Select experimental current voltage characteristic",type=['txt'], accept_multiple_files=False, label_visibility='collapsed')
+        if uploaded_file is not None:
+            bytes_date = uploaded_file.getvalue()
+            data = uploaded_file.getvalue().decode('utf-8')
+            # validation
+            msg = ''
+            chk_chars = 0
+            msg_chars = ''
+            chk_pattern = 0
+            msg_pattern = ''
+            chk_filename = 0
+            msg_filename = ''
+            if '=' in data or '+' in data or '@' in data or '0x09' in data or '0x0D' in data:
+                chk_chars = 1
+                msg_chars = "Illegal characters used. \n"
+            data = data.splitlines()
+            pattern = re.compile("^-?\d*(\.\d*)?\s+-?\d*(\.\d*)?$")
+            for line in data[1:]:
+                if not pattern.match(line):
+                    chk_pattern = 1
+                    msg_pattern = 'File content does not meet the required pattern. \n'
+            file_name = secure_filename(uploaded_file.name)
+            if len(file_name) > 50:
+                print('filename too long. Max 50 characters')
+                chk_filename = 1
+                msg_filename = 'Filename is too long. Max 50 characters'
+            
+            if chk_chars + chk_pattern + chk_filename == 0:
+                st.button("Upload file to SimSS", on_click=upload_expJV)
+                st.markdown('<hr>', unsafe_allow_html=True)
+            else:
+                st.error(msg_chars + msg_pattern + msg_filename)
+                st.markdown('<hr>', unsafe_allow_html=True)
+
 with st.sidebar: 
     st.button('Save device parameters', on_click=save_parameters)
     if os.path.isfile(output_path + str(id) + '/' + 'device_parameters_' + str(id) + '.txt'):

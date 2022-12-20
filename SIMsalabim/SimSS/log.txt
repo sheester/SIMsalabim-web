@@ -1,6 +1,6 @@
 Version 4.44
 Size of reals used in simulation: 10 bytes
-Timestamp at start: 16-12-22 15:15:40
+Timestamp at start: 19-12-22 17:05:52
 Values from command line:
 Read parameters from device_parameters.txt
 
@@ -44,5 +44,5 @@ The following voltages will be simulated:
  30     1.450    FALSE      TRUE
  31     1.500    FALSE      TRUE
 
-Timestamp at end: 16-12-22 15:15:42
-Total run time:  1.259 seconds.
+Timestamp at end: 19-12-22 17:05:54
+Total run time:  1.305 seconds.
