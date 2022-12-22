@@ -1,3 +1,5 @@
+"""Functions for page: Simulation_results"""
+
 def create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, xlabel, ylabel, yscale, color):
     """Create a pyplot for a set of variables for a given Vext.
 
@@ -28,12 +30,14 @@ def create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, xl
     -------
     axes
         Updated Axes object for the plot
-    """    
+    """
     i=0
     data = data_var[data_var['Vext'] == choice_voltage]
     for y_var in par:
-        plot_funcs(data=data, x='x', y=y_var, ax=ax, label=labels[i], color=color[i],linewidth=1)
+        if (sum(data[y_var]) != 0):
+            plot_funcs(data['x'], data[y_var], label=labels[i], color=color[i],linewidth=1)
         i+=1
+    ax.legend()
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_yscale(yscale)
@@ -61,19 +65,19 @@ def plot_jv_curve(data, choice_voltage, plot_funcs, ax, exp, data_exp='' ):
     -------
     axes
         Updated Axes object for the plot
-    """    
-    data['Jext']=data['Jext']/1e1
-    plot_funcs(data=data, x='Vext', y="Jext", ax=ax, label='Simulated')
+    """
+    plot_funcs(data['Vext'], data['Jext'], label='Simulated')
     ax.axvline(choice_voltage, color='k', linestyle='--')
     ax.set_xlabel('V$\mathrm{_{ext}}$ [V]')
-    ax.set_ylabel('J$\mathrm{_{ext}}$ [mAcm$^{-2}$]')
+    ax.set_ylabel('J$\mathrm{_{ext}}$ [Am$^{-2}$]')
     ax.set_title('Current-voltage characteristic')
-    if exp == True:
-        data_exp['J'] = data_exp['J']/1e1
-        plot_funcs(data=data_exp, x='V', y='J', ax=ax, label='Experimental')
+    if exp is True:
+        plot_funcs(data_exp['V'], data_exp['J'], label='Experimental')
         ax.legend()
-    if exp == False:
-        ax.get_legend().remove()
+    if exp is False:
+        legend = ax.legend()
+        legend.remove()
+        # ax.get_legend().remove()
     ax.axhline(y=0, color='gray', linewidth=0.5)
     ax.axvline(x=0, color='gray', linewidth=0.5)
     return ax
@@ -100,7 +104,7 @@ def plot_potential(data_var, choice_voltage, plot_funcs, ax, color):
     -------
     axes
         Updated Axes object for the plot
-    """    
+    """
     par = ['V']
     labels = ['V']
     ax = create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax,'x [nm]','V [V]','linear', color)
@@ -128,7 +132,7 @@ def plot_energy(data_var, choice_voltage, plot_funcs, ax, color):
     -------
     axes
         Updated Axes object for the plot
-    """    
+    """
     par = ['Evac','Ec', 'Ev', 'phin', 'phip']
     labels = ['E$_{\mathrm{vac}}$','E$_{\mathrm{c}}$','E$_{\mathrm{v}}$','E$_{\mathrm{Fn}}$','E$_{\mathrm{Fp}}$']
     ax = create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]','Energy level [eV]','linear', color)
@@ -156,7 +160,7 @@ def plot_carrier_densities(data_var, choice_voltage, plot_funcs, ax, color):
     -------
     axes
         Updated Axes object for the plot
-    """   
+    """
     par = ['n','p','nion','pion']
     labels = ['n','p','n$_{\mathrm{ion}}$','p$_{\mathrm{ion}}$']
     create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Carrier density [ m$^{-3}$ ]','log',color)
@@ -184,11 +188,11 @@ def plot_filling_levels(data_var, choice_voltage, plot_funcs, ax, color):
     -------
     axes
         Updated Axes object for the plot
-    """   
+    """
     par = ['ftb1','fti1']
     labels = ['ft$_{\mathrm{b1}}$','ft$_{\mathrm{i1}}$']
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Filling level [ - ]','linear', color)
-    ax.set_title('Filling levels')
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Filling of traps [ - ]','linear', color)
+    ax.set_title('Filling of traps')
     return ax
 
 # Transport [m2V-1s-1]
@@ -212,11 +216,11 @@ def plot_transport(data_var, choice_voltage, plot_funcs, ax, color):
     -------
     axes
         Updated Axes object for the plot
-    """   
+    """
     par = ['mun','mup']
     labels = ['$\mathrm{\mu_{n}}$','$\mathrm{\mu_{p}}$']
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Transport [ m$^{-2}$V$^{-1}$s$^{-1}$ ]','linear', color)
-    ax.set_title('Transport')
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Mobility [ m$^{-2}$V$^{-1}$s$^{-1}$ ]','log', color)
+    ax.set_title('Mobilities')
     return ax
 
 # Generation and Recombination [m-3s-1]
@@ -240,20 +244,17 @@ def plot_generation_recombination(data_var, choice_voltage, plot_funcs, ax, colo
     -------
     axes
         Updated Axes object for the plot
-    """   
+    """
     par=['Gehp', 'Gfree', 'Rdir','BulkSRHn', 'BulkSRHp', 'IntSRHn', 'IntSRHp']
     labels=['G$_{\mathrm{ehp}}$', 'G$_{\mathrm{free}}$', 'R$_{\mathrm{dir}}$', 'BulkSRH$_{\mathrm{n}}$', 'BulkSRH$_{\mathrm{p}}$', 'IntSRH$_{\mathrm{n}}$', 'IntSRH$_{\mathrm{p}}$']
     create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Generation/Recombination Rate [ m$^{-3}$s$^{-1}$ ]','linear', color)
     ax.set_title('Generation and Recombination Rates')
     return ax
 
-# Currents [Am-3]
+# Currents [Am-2]
 def plot_currents(data_var, choice_voltage, plot_funcs, ax, color):
     """Make a plot with the Current parameters
-
-    Parameters
-    ----------
-    data_var : DataFrame
+float
         All output data from the Var.dat file
     choice_voltage : float
         The Vext potential for which to show the data
@@ -268,11 +269,10 @@ def plot_currents(data_var, choice_voltage, plot_funcs, ax, color):
     -------
     axes
         Updated Axes object for the plot
-    """   
+    """
     par=['Jn','Jp','Jtot']
     labels = ['J$_{\mathrm{n}}$', 'J$_{\mathrm{p}}$', 'J$_{\mathrm{tot}}$']
-    for item in par:
-        data_var[item]=data_var[item]/1e1
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Current density [mAcm$^{-2}$]','linear', color)
-    ax.set_title('Currents')
+
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Current density [Am$^{-2}$]','linear', color)
+    ax.set_title('Current densities')
     return ax

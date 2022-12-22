@@ -1,19 +1,26 @@
-# helper_functions.py>
+"""Functions for page: device_parameters"""
 
-# functions
 def read_from_txt(fp):
-# Description:  Read the opened .txt file line by line and store all in the dev_par_object. 
-# Arguments:    fp (TextIOWrapper) - filepointer to the opened .txt file.
-# Returns:      dev_par_object (List) - List with nested lists for all parameters in all sections.
-# 
+    """Read the opened .txt file line by line and store all in the dev_par_object.
+
+    Parameters
+    ----------
+    fp : TextIOWrapper
+        filepointer to the opened .txt file.
+
+    Returns
+    -------
+    List
+        List with nested lists for all parameters in all sections.
+    """
 # Note:         List object format (basic layout) Identical strucutre for all sections
-#               
-#               [   
-#                   [   
-#                       'Description', 
+#
+#               [
+#                   [
+#                       'Description',
 #                       ['comm', {comment1}],
 #                       ['comm', {comment2}],
-#                           ... 
+#                           ...
 #                   ],
 #                   [   'General',
 #                       ['par', {parameter_general_name1}, {parameter_general_value1}, {parameter_general_description1}],
@@ -28,7 +35,7 @@ def read_from_txt(fp):
 #               ]
 
     index=0 # When reading the device_parameters.txt file, first reset the index counter.
-    
+
     #  Definition of the parameter object with section names.
     dev_par_object = [['Description'],['General'],['Mobilities'],['Contacts'],['Transport layers'],['Ions'],
                     ['Generation and recombination'],['Trapping'],['Numerical Parameters'],
@@ -60,20 +67,29 @@ def read_from_txt(fp):
     return dev_par_object
 
 def write_to_txt(dev_par_object):
-# Description:  Convert the List object into a single string. Formatted to the device_parameter definition
-# Arguments:    dev_par_object (List) - List object with all parameters and comments.
-# Returns:      par_file (string) - Formatted string for the txt file
+    """Convert the List object into a single string. Formatted to the device_parameter definition
 
+    Parameters
+    ----------
+    dev_par_object : List
+        List object with all parameters and comments.
+
+    Returns
+    -------
+    string
+        Formatted string for the txt file
+    """
     par_file=[] # Initialize List to hold all lines
     lmax = 0 # Max width of parameter = value section, initialise with 0
+    section_length_max = 84
 
     # Description and Version
     for item in dev_par_object[0][1:]:
         # First element of the main object contains the top description lines. Skip very first element (Title).
         desc_line = "** " + item[1] + '\n'
         par_file.append(desc_line)
-    
-    # Determine max width of the 'parameter = value' section of the txt file. 
+
+    # Determine max width of the 'parameter = value' section of the txt file.
     for sect_item in dev_par_object[1:]:
         # Loop over all sections
         for par_item in sect_item[1:]:
@@ -84,7 +100,7 @@ def write_to_txt(dev_par_object):
                 if len(temp_string)> lmax:
                     # Update maxlength if length of 'par = val' combination exceeds it.
                     lmax = len(temp_string)
-    # Add 1 to max length to allow for a empty space between 'par=val' and description.                
+    # Add 1 to max length to allow for a empty space between 'par=val' and description.
     lmax = lmax + 1
 
     # Read every entry of the Parameter List object and create a formatted line (string) for it. Append to string List par_file.
@@ -92,9 +108,9 @@ def write_to_txt(dev_par_object):
         #Loop over all sections. Exclude the first (Descriptive Title) element.
         # Start with a new line before each section name. Section title must be of format **title************... Length of the section title is 84 characters.
         par_file.append('\n')
-        sec_title = "**" + sect_element[0] 
+        sec_title = "**" + sect_element[0]
         sec_title_length = len(sec_title)
-        sec_title = sec_title + "*"*(84-sec_title_length) + '\n'
+        sec_title = sec_title + "*"*(section_length_max-sec_title_length) + '\n'
         par_file.append(sec_title)
         for par_element in sect_element:
             #  Loop over all elements in the section list, both parameters ('par') and comments ('comm')
@@ -103,7 +119,7 @@ def write_to_txt(dev_par_object):
                 par_line = '** ' + par_element[1] + '\n'
                 par_file.append(par_line)
             elif par_element[0] == 'par':
-                # Create string for a parameter. Format is par = val      
+                # Create string for a parameter. Format is par = val
                 par_line = par_element[1] + ' = ' + par_element[2]
                 par_line_length = len(par_line)
                 # The string is filled with blank spaces until the max length is reached
@@ -129,14 +145,23 @@ def write_to_txt(dev_par_object):
     return par_file
 
 def read_comment_line(line, index):
-# Description:  Read the line of type (left adjusted) comment (**). 
-#               If the commented line matches a section name, update the index to store the parameters for this section in a List. 
-#               When a left adjusted comment is encountered that does not match a section name or is not a starting comment/description, 
-#               set the changes parameter to True to indicate that the comment must be added to the current section (via the index)
-# Arguments:    line (string) - single line from the txt parameter file
-#               index (number) - current index (section)
-# Returns:      index (number) - (updated) object/section index
-#
+    """ Read the line of type (left adjusted) comment (**).
+        If the commented line matches a section name, update the index to store the parameters for this section in a List.
+        When a left adjusted comment is encountered that does not match a section name or is not a starting comment/description,
+        set the changes parameter to True to indicate that the comment must be added to the current section (via the index)
+
+    Parameters
+    ----------
+    line : string
+        single line from the txt parameter file
+    index : number
+        current index (section)
+
+    Returns
+    -------
+    number
+        (updated) object/section index
+    """
 # Note:         List indices:
 #                   0: File desription + version
 #                   1: General
@@ -193,32 +218,28 @@ def split_line_scpars(item, solar_cell_param, par, unit):
     -------
     solar_cell_param : dict
         Updated Dict to hold the solar cell parameters
-    """    
+    """
     fact = 1
     # Remove the parameter name
     item = item.replace(par + ':','')
     # If not already done, remove the unit
     if not par== 'Jsc' and not par == 'FF' and not par == 'MPP':
         item = item.replace(unit,'')
-    # Set the sclaing factor for Jsc to convert to mAcm-2
-    if par == 'Jsc':
-        fact = 10
-    # Place the units in square brackets 
+    # Place the units in square brackets
     if not par == 'FF':
         unit = '[' + unit +']'
     val_list=item.split(' ')
-    i=0
     val_list_compact=[]
     for val_list_split in val_list:
         if not val_list_split == '':
             val_list_compact.append(val_list_split)
     for i in val_list_compact:
         if len(val_list_compact)>0:
-            solar_cell_param['Simulated'][par + ' ' + unit] = (str(float(val_list_compact[0])/fact))+val_list_compact[1]+(str(float(val_list_compact[2])/fact))
+            solar_cell_param['Simulated'][par + ' ' + unit] = (((val_list_compact[0])))+val_list_compact[1]+(((val_list_compact[2])))
         if len (val_list_compact) > 3:
-            solar_cell_param['Experimental'][par + ' ' + unit] = (str(float(val_list_compact[3])/fact))+val_list_compact[4]+(str(float(val_list_compact[5])/fact))
+            solar_cell_param['Experimental'][par + ' ' + unit] = (((val_list_compact[3])))+val_list_compact[4]+(((val_list_compact[5])))
         if len (val_list_compact) > 5:
-            solar_cell_param['Deviation'][par + ' ' + unit] = (str(float(val_list_compact[6])/fact))
+            solar_cell_param['Deviation'][par + ' ' + unit] = (((val_list_compact[6])))
     return solar_cell_param
 
 def write_scpars(item, solar_cell_param, solar_cell):
@@ -238,19 +259,61 @@ def write_scpars(item, solar_cell_param, solar_cell):
     """
     if 'Jsc' in item:
         item = item.replace('A/m2','')
-        solar_cell_param = split_line_scpars(item, solar_cell_param,'Jsc', 'mAcm\u207b\u00b2' )
+        solar_cell_param = split_line_scpars(item, solar_cell_param,'Jsc', 'Am\u207b\u00b2' )
         solar_cell = True
     if 'Vmpp' in item:
         solar_cell_param = split_line_scpars(item, solar_cell_param,'Vmpp', 'V' )
-        solar_cell = True     
+        solar_cell = True
     if 'MPP' in item:
         item = item.replace('W/m2','')
         solar_cell_param = split_line_scpars(item, solar_cell_param,'MPP', 'Wm\u207b\u00b2' )
-        solar_cell = True     
+        solar_cell = True
     if 'Voc' in item:
         solar_cell_param = split_line_scpars(item, solar_cell_param,'Voc', 'V' )
-        solar_cell = True     
+        solar_cell = True
     if 'FF' in item:
         solar_cell_param = split_line_scpars(item, solar_cell_param,'FF', '' )
-        solar_cell = True      
+        solar_cell = True
     return solar_cell_param,solar_cell
+
+def verify_upload_parameter_file(file_str, simss_path):
+    line_min = []
+    line_min_default = []
+    valid_upload = False
+    msg = ''
+
+    # Read the uploaded file
+    with open(simss_path+'device_parameters_test.txt', encoding='utf-8') as fpp:
+        count = 1
+        for line in fpp:
+    # for line in file_str.splitlines():   
+            line = line.strip()
+            if not line.startswith('*') and not line.startswith('\n') and not line == '':
+                line_min.append([line,count])
+            count+=1
+
+    # Open the standard device parameters file
+    with open(simss_path+'device_parameters.txt', encoding='utf-8') as fp:
+        count = 1
+        for line in fp:
+            line = line.strip()
+            if not line.startswith('*') and not line.startswith('\n') and not line == '':
+                line_min_default.append([line,count])
+            count+=1
+
+    # Loop simultaneously over both Lists and check whether each entry matches. If not, return an error message 
+    for a,b in zip(line_min,line_min_default):
+        a_par = a[0].split('=')
+        b_par = b[0].split('=')
+        if len(a[0])<2:
+            valid_upload = False
+            msg = ('Upload failed, file not formatted correctly.\n\n Line ' + str(a[1]) + ': " ' + a + '" is not according to the format.' )
+            return valid_upload,msg
+        elif a_par[0] != b_par[0]:
+            valid_upload = False
+            msg = ('Upload failed, expected parameter: "' + b_par[0] + '" (line ' + str(b[1]) + ') and received parameter "' + a_par[0] + '" (line ' + str(a[1]) + ')' )
+            return valid_upload,msg
+        else:
+            valid_upload = True
+    return valid_upload,msg
+

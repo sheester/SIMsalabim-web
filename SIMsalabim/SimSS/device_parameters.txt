@@ -128,12 +128,12 @@ until_Voc = 0            * if 1 then SimSS will stop at Voc
 **User interface********************************************************************
 Pause_at_end = 0         * pause at the end of the simulation yes(1) or no (0)
 AutoTidy = 0             * if 1, then SimSS will always tidy up this file
-UseExpData = 1           * if 1, SimSS will try to read JV_Exp and use it
+UseExpData = 0           * if 1, SimSS will try to read JV_Exp and use it
 ExpJV = expJV.txt        * name of file with experimental JV characteristics
 rms_mode = lin           * lin or log: use J or log(J) in calc. of rms error
 rms_threshold = 0.8      * threshold of fraction converged points in calc. rms error
 JV_file = JV.dat         * name of the file with simulated JV characteristics
 Var_file = Var.dat       * name of the file with (x,V,n,p,Jn,Jp,etc.) at V=Vmax
-OutputRatio = 2        * Output to Var_file every OutputRatio voltages
+OutputRatio = 1        * Output to Var_file every OutputRatio voltages
 scPars_file = scPars.dat * name of file with solar cell parameters
 log_file = log.txt       * name of log file

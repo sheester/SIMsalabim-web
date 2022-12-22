@@ -1,3 +1,4 @@
+"""Functions for general use"""
 import streamlit as st
 
 def local_css(file_name):
@@ -7,6 +8,7 @@ def local_css(file_name):
     ----------
     file_name : string
         path to the CSS file
-    """    
-    with open(file_name) as f:
+    """
+
+    with open(file_name, encoding='utf-8') as f:
         st.markdown(f'<style>{f.read()}</style>',unsafe_allow_html=True)

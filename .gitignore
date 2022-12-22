@@ -6,3 +6,5 @@
 !/SIMsalabim/SimSS/device_parameters.txt
 *.zip
 /Simulations
+.pylintrc
+.vscode

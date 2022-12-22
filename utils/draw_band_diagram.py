@@ -1,6 +1,7 @@
+"""Draw the energy band diagram"""
 import matplotlib.pyplot as plt
 
-def create_energy_label(x_left, x_right, y, type, position, ax):
+def create_energy_label(x_left, x_right, y, band_type, position, ax):
     """Create and place the label for an energy level (in eV) of a layer
 
     Parameters
@@ -11,16 +12,16 @@ def create_energy_label(x_left, x_right, y, type, position, ax):
         right x position of the layer [m]
     y : float
         Energy of the band [eV]
-    type : string
+    band_type : string
         Type of band (CB, VB, Electrode)
     position : float
         Full length of the device
     ax : axes
         Axes object for the plot
-    """    
+    """
 
     # If the layer covers over 20% of the figure size, move the label to the x middle of the figure. Else align oit to the left side pf the layer.
-    if 'VB' in type:
+    if 'VB' in band_type:
         offset = 0.035
     else:
         offset = -0.01
@@ -30,7 +31,7 @@ def create_energy_label(x_left, x_right, y, type, position, ax):
     else:
         ax.text(x_left,y+offset*y,y)
 
-def create_width_label(x_left,x_right,value,y_min,ax, color):
+def create_width_label(x_left, x_right, value, y_min, ax, color):
     """ Create the label to displaythe width of a layer on the width bar
 
     Parameters
@@ -47,7 +48,7 @@ def create_width_label(x_left,x_right,value,y_min,ax, color):
         Axes object for the plot
     color : string
         Color of the label
-    """    
+    """
     ax.text((x_left+x_right)/2,y_min-0.7,round(value*1e9),color=color)
 
 
@@ -68,7 +69,7 @@ def plot_device_widths(ax, y_min, L, LLTL, LRTL, L_original):
         Width of the Right Transport Layer
     L_original : List
         List with the layer widths before scaling
-    """    
+    """
     # Horizontal line below the band diagram
     ax.hlines(y_min-0.75,0,L,color='k')
     # Small vertical line on each layer interface
@@ -92,10 +93,10 @@ def create_band_energy_diagram(param):
     -------
     Figure
         Figure object with the band energy diagram
-    """    
+    """
 
     fig, ax = plt.subplots()
-    
+
     # Read parameters
     L = float(param["L"])
     LLTL = float(param["L_LTL"])
@@ -114,7 +115,7 @@ def create_band_energy_diagram(param):
     # Save original values for width bar
     L_original = [L,LLTL,LRTL]
     # Set a threshold width for bands to remain visible. Threshold is 10% of the total device width. Only when Transport Layer are defined. 
-    if not LLTL == 0 and not LRTL == 0:
+    if LLTL != 0 and LRTL != 0:
         if LLTL < 0.1*L:
             LLTL = 0.1*L
         if LRTL < 0.1*L:
@@ -124,7 +125,7 @@ def create_band_energy_diagram(param):
             L_diff = 0.1*L-(L-LLTL-LRTL)
             LLTL = LLTL - L_diff*frac
             LRTL = LRTL - L_diff*(1/frac)
-    
+
     # Left Transport Layer
     if LLTL > 0:
         ax.fill_between([0, LLTL],[CBLTL,CBLTL],y2=[VBLTL,VBLTL],color='#AF312E')
@@ -147,11 +148,13 @@ def create_band_energy_diagram(param):
     create_energy_label(-0.1*L,0,WL,'WL',L,ax)
 
     # Right Electrode
-    ax.plot([L,L+0.1*L],[WR,WR],color='k')    
+    ax.plot([L,L+0.1*L],[WR,WR],color='k')
     create_energy_label(L,L+0.1*L,WR,'WR',L,ax)
 
+    # Hide the figure axis
     ax.axis('off')
 
+    # Add a horizontal bar to the figure width the layer widths
     plot_device_widths(ax, E_low, L, LLTL, LRTL, L_original)
 
     # plt.show()

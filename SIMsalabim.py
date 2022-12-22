@@ -1,21 +1,28 @@
-import streamlit as st
+"""SIMsalabim Web Application"""
 from datetime import datetime, timezone
+import streamlit as st
 from utils import general_functions as gf
+
+######### Page configuration ######################################################################
 
 st.set_page_config(layout="wide", page_title="SIMsalabim online", page_icon='./logo/SIMsalabim_logo_HAT.jpg')
 
-# Set an id for the user to identify input/output files. Currently UTC timestamp
-id_user = int(datetime.now(timezone.utc).timestamp()*1e6)
-st.session_state.key='id'
-st.session_state['id']=id_user
-
-# Load custom CSS to reduce whitespace between rows in columns. Convert disbaled greyed text back to either white or black.
+# Load custom CSS.
 gf.local_css('./utils/style.css')
+
+######### Parameter Initialisation ################################################################
+
+# Set an id for the user to identify input/output files. Currently UTC timestamp
+if 'id' not in st.session_state:
+    id_user = int(datetime.now(timezone.utc).timestamp()*1e6)
+    st.session_state.key='id'
+    st.session_state['id']=id_user
 
 #  SIMsalabim logo
 with st.sidebar:
     st.image('./logo/SIMsalabim_logo_cut_trans.png')
 
+# Introduction
 st.title("SIMsalabim online")
 
 st.write(
