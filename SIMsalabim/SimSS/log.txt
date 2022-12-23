@@ -1,78 +1,42 @@
 Version 4.44
-Size of reals used in simulation: 10 bytes
-Timestamp at start: 21-12-22 13:14:50
+Size of reals used in simulation: 8 bytes
+Timestamp at start: 23-12-22 10:03:38
 Values from command line:
-Read parameters from device_parameters.txt
-
-Read experiment JV curve from expJV.txt.
-This overrides the voltage distribution that is in the parameter file
-and any voltage parameters passed via the command line.
-Vmin: 0.0000 Vmax: 1.2000
-
+Read parameters from ../../Simulations/1671786009174176/device_parameters_1671786009174176.txt
 
 The following voltages will be simulated:
   i       V    UpdateIons   Store
   1     0.000    FALSE      TRUE
-  2     0.020    FALSE      TRUE
-  3     0.040    FALSE      TRUE
-  4     0.060    FALSE      TRUE
-  5     0.080    FALSE      TRUE
-  6     0.100    FALSE      TRUE
-  7     0.120    FALSE      TRUE
-  8     0.140    FALSE      TRUE
-  9     0.160    FALSE      TRUE
- 10     0.180    FALSE      TRUE
- 11     0.200    FALSE      TRUE
- 12     0.220    FALSE      TRUE
- 13     0.240    FALSE      TRUE
- 14     0.260    FALSE      TRUE
- 15     0.280    FALSE      TRUE
- 16     0.300    FALSE      TRUE
- 17     0.320    FALSE      TRUE
- 18     0.340    FALSE      TRUE
- 19     0.360    FALSE      TRUE
- 20     0.380    FALSE      TRUE
- 21     0.400    FALSE      TRUE
- 22     0.420    FALSE      TRUE
- 23     0.440    FALSE      TRUE
- 24     0.460    FALSE      TRUE
- 25     0.480    FALSE      TRUE
- 26     0.500    FALSE      TRUE
- 27     0.520    FALSE      TRUE
- 28     0.540    FALSE      TRUE
- 29     0.560    FALSE      TRUE
- 30     0.580    FALSE      TRUE
- 31     0.600    FALSE      TRUE
- 32     0.620    FALSE      TRUE
- 33     0.640    FALSE      TRUE
- 34     0.660    FALSE      TRUE
- 35     0.680    FALSE      TRUE
- 36     0.700    FALSE      TRUE
- 37     0.720    FALSE      TRUE
- 38     0.740    FALSE      TRUE
- 39     0.760    FALSE      TRUE
- 40     0.780    FALSE      TRUE
- 41     0.800    FALSE      TRUE
- 42     0.820    FALSE      TRUE
- 43     0.840    FALSE      TRUE
- 44     0.860    FALSE      TRUE
- 45     0.880    FALSE      TRUE
- 46     0.900    FALSE      TRUE
- 47     0.920    FALSE      TRUE
- 48     0.940    FALSE      TRUE
- 49     0.960    FALSE      TRUE
- 50     0.980    FALSE      TRUE
- 51     1.000    FALSE      TRUE
- 52     1.020    FALSE      TRUE
- 53     1.040    FALSE      TRUE
- 54     1.060    FALSE      TRUE
- 55     1.080    FALSE      TRUE
- 56     1.100    FALSE      TRUE
- 57     1.120    FALSE      TRUE
- 58     1.140    FALSE      TRUE
- 59     1.160    FALSE      TRUE
- 60     1.180    FALSE      TRUE
- 61     1.200    FALSE      TRUE
+  2     0.050    FALSE      TRUE
+  3     0.100    FALSE      TRUE
+  4     0.150    FALSE      TRUE
+  5     0.200    FALSE      TRUE
+  6     0.250    FALSE      TRUE
+  7     0.300    FALSE      TRUE
+  8     0.350    FALSE      TRUE
+  9     0.400    FALSE      TRUE
+ 10     0.450    FALSE      TRUE
+ 11     0.500    FALSE      TRUE
+ 12     0.550    FALSE      TRUE
+ 13     0.600    FALSE      TRUE
+ 14     0.650    FALSE      TRUE
+ 15     0.700    FALSE      TRUE
+ 16     0.750    FALSE      TRUE
+ 17     0.800    FALSE      TRUE
+ 18     0.850    FALSE      TRUE
+ 19     0.900    FALSE      TRUE
+ 20     0.950    FALSE      TRUE
+ 21     1.000    FALSE      TRUE
+ 22     1.050    FALSE      TRUE
+ 23     1.100    FALSE      TRUE
+ 24     1.150    FALSE      TRUE
+ 25     1.200    FALSE      TRUE
+ 26     1.250    FALSE      TRUE
+ 27     1.300    FALSE      TRUE
+ 28     1.350    FALSE      TRUE
+ 29     1.400    FALSE      TRUE
+ 30     1.450    FALSE      TRUE
+ 31     1.500    FALSE      TRUE
 
-Timestamp at end: 21-12-22 13:14:52
-Total run time:  1.781 seconds.
+Timestamp at end: 23-12-22 10:03:39
+Total run time:  0.647 seconds.

@@ -1,4 +1,6 @@
 """Functions for page: device_parameters"""
+import os
+import random
 
 def read_from_txt(fp):
     """Read the opened .txt file line by line and store all in the dev_par_object.
@@ -276,14 +278,20 @@ def write_scpars(item, solar_cell_param, solar_cell):
         solar_cell = True
     return solar_cell_param,solar_cell
 
-def verify_upload_parameter_file(file_str, simss_path):
+def verify_upload_parameter_file(data_devpar):
+    tmp_id = random.randint(0,1e10)
+    destination_file_devpar = open('Simulations/tmp/devpar_' + str(tmp_id) + '.txt', "w", encoding='utf-8')
+    destination_file_devpar.write(data_devpar)
+    destination_file_devpar.close()
+
+    simss_path = 'SIMsalabim/SimSS/'
     line_min = []
     line_min_default = []
     valid_upload = False
     msg = ''
 
     # Read the uploaded file
-    with open(simss_path+'device_parameters_test.txt', encoding='utf-8') as fpp:
+    with open('Simulations/tmp/devpar_' + str(tmp_id) + '.txt', encoding='utf-8') as fpp:
         count = 1
         for line in fpp:
     # for line in file_str.splitlines():   
@@ -291,6 +299,10 @@ def verify_upload_parameter_file(file_str, simss_path):
             if not line.startswith('*') and not line.startswith('\n') and not line == '':
                 line_min.append([line,count])
             count+=1
+
+    for item_dir_list in os.listdir('Simulations/tmp'):
+        if str(tmp_id) in item_dir_list:
+            os.remove('Simulations/tmp/devpar_' + str(tmp_id) + '.txt')
 
     # Open the standard device parameters file
     with open(simss_path+'device_parameters.txt', encoding='utf-8') as fp:

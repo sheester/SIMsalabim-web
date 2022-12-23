@@ -211,13 +211,38 @@ else:
         destination_file.close()
         return st.success('File upload complete')
 
+    def upload_devpar():
+        """Read and decode the uploaded device parameters file
+        """
+        # Decode the uploaded file (utf-8)
+        data_devpar = uploaded_file_devpar.getvalue().decode('utf-8')
+
+        # Setup an id specific folder
+        dir_path=output_path + id_session
+        # If folder does not exist yet, create it
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+
+        # Upon saving a new set of device parameters, remove output files from previous simulation
+        for item_dir_list in os.listdir(output_path + id_session):
+            if id_session in item_dir_list:
+                os.remove(output_path + id_session + '/' + item_dir_list)
+
+        target_path_devpar = output_path + id_session + '/device_parameters_' + id_session + '.txt'
+        destination_file_devpar = open(target_path_devpar, "w", encoding='utf-8')
+        destination_file_devpar.write(data_devpar)
+        destination_file_devpar.close()
+        
+        return st.success('Upload device parameters complete')
     ######### UI layout ###############################################################################
 
-    def verify_up():
-        valid,msg = hf.verify_upload_parameter_file('',simss_path)
+    def verify_upload_devpar(data_devpar):
+        valid,msg = hf.verify_upload_parameter_file(data_devpar)
         if valid is False:
-            st.error(msg)
-    st.button("tets", on_click=verify_up)
+            # st.error(msg)
+            return 1,msg
+        else:
+            return 0,msg
 
     with st.sidebar:
         # Functionality to upload an experimental JV curve
@@ -263,6 +288,35 @@ else:
                 else:
                     # One or more checks failed. Do not allow upload and show error message
                     st.error(msg_chars + msg_pattern + msg_filename)
+                    st.markdown('<hr>', unsafe_allow_html=True)
+
+    with st.sidebar:
+        # Functionality to upload an experimental JV curve
+        chk_devpar = st.checkbox("Upload device parameters")
+        if chk_devpar:
+            uploaded_file_devpar = st.file_uploader("Select device parameters file to upload",type=['txt'], accept_multiple_files=False, label_visibility='collapsed')
+            if uploaded_file_devpar is not None:
+                bytes_date_devpar = uploaded_file_devpar.getvalue()
+                data_devpar = uploaded_file_devpar.getvalue().decode('utf-8')
+                # validation of the uploaded file: 
+                # - Filename length
+                msg = ''
+                chk_filename = 0
+                msg_filename = ''                
+                # Filename lengthand secure the filename.       
+                file_name = secure_filename(uploaded_file_devpar.name)
+                if len(file_name) > 50:
+                    print('filename too long. Max 50 characters')
+                    chk_filename = 1
+                    msg_filename = 'Filename is too long. Max 50 characters'
+                chk_devpar_file,msg_devpar = verify_upload_devpar(data_devpar)
+                if  chk_filename + chk_devpar_file == 0:
+                    # All checks passed, allow upload
+                    st.button("Upload file to SimSS", on_click=upload_devpar)
+                    st.markdown('<hr>', unsafe_allow_html=True)
+                else:
+                    # One or more checks failed. Do not allow upload and show error message
+                    st.error(msg_filename + msg_devpar)
                     st.markdown('<hr>', unsafe_allow_html=True)
 
     with st.sidebar:
