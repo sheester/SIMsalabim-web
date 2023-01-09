@@ -5,6 +5,7 @@
 /SIMsalabim/SimSS/*.dat
 !/SIMsalabim/SimSS/device_parameters.txt
 *.zip
-/Simulations
+/Simulations/*
+!/Simulations/tmp*
 .pylintrc
 .vscode

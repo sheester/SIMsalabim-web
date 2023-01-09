@@ -234,7 +234,6 @@ else:
         destination_file_devpar.close()
         
         return st.success('Upload device parameters complete')
-    ######### UI layout ###############################################################################
 
     def verify_upload_devpar(data_devpar):
         valid,msg = hf.verify_upload_parameter_file(data_devpar)
@@ -244,6 +243,8 @@ else:
         else:
             return 0,msg
 
+    ######### UI layout ###############################################################################
+    
     with st.sidebar:
         # Functionality to upload an experimental JV curve
         chk_expJVcurve = st.checkbox("Upload experimental current voltage characteristic")
