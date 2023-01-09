@@ -1,4 +1,13 @@
 #!/bin/bash
+# Recompile simss for operating system support
+
+if ! command fpc -i >& /dev/null; then
+    echo 'Free Pascal Compiler is not installed. Refer to manual for installation instructions.'
+    exit 1
+fi
+
+fpc SIMsalabim/SimSS/simss
+
 # Check whether pip/pipenv is installed
 if ! command pip -V >& /dev/null 
 then
