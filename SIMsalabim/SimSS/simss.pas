@@ -2,7 +2,7 @@ PROGRAM SimSS;
 
 {
 SIMsalabim:a 1D drift-diffusion simulator 
-Copyright (c) 2020, 2021, 2022 Dr T.S. Sherkar, Dr V.M. Le Corre, M. Koopmans,
+Copyright (c) 2020, 2021, 2022, 2023 Dr T.S. Sherkar, Dr V.M. Le Corre, Dr M. Koopmans,
 F. Wobben, and Prof. Dr. L.J.A. Koster, University of Groningen
 This source file is part of the SIMsalabim project.
 
@@ -58,7 +58,7 @@ USES {our own, generic ones:}
 
 CONST
     ProgName = TProgram.SimSS;  
-    version = '4.44';   {version, 1.00 = 10-03-2004}
+    version = '4.45';   {version, 1.00 = 10-03-2004}
 
 {first: check if the compiler is new enough, otherwise we can't check the version of the code}
 {$IF FPC_FULLVERSION < 30200} {30200 is 3.2.0}
@@ -128,7 +128,7 @@ VAR i : INTEGER;
     dumstr : STRING;
     V, J : ARRAY[1..maxExpData] OF myReal;
 BEGIN
-    IF NOT FileExists(par.ExpJV) THEN Stop_Prog('Could not find file '+par.ExpJV, FALSE);
+    IF NOT FileExists(par.ExpJV) THEN Stop_Prog('Could not find file '+par.ExpJV, EC_FileNotFound, FALSE);
     ASSIGN(inp, par.ExpJV);
     RESET(inp);
     
@@ -136,7 +136,7 @@ BEGIN
     TRY 
 		READLN(inp, dumstr);
     EXCEPT
-		Stop_Prog('Cannot read a header from '+par.ExpJV+', is it empty?', FALSE);
+		Stop_Prog('Cannot read a header from '+par.ExpJV+', is it empty?', EC_InvalidInput, FALSE);
     END;
 
     i:=0;
@@ -146,7 +146,7 @@ BEGIN
         TRY
             READLN(inp, V[i], J[i]);
         EXCEPT
-            Stop_Prog('The experimental JV curve in '+par.ExpJV+' can only contain voltage and current density, etc.', FALSE);
+            Stop_Prog('The experimental JV curve in '+par.ExpJV+' can only contain voltage and current density, etc.', EC_InvalidInput, FALSE);
         END
     END;
 
@@ -154,8 +154,8 @@ BEGIN
 
     {now check a number of things:}
     stv.NJV:=i; {this overrides NJV calculated from Vmin,Vmax,Vstep, or from direct input}
-    IF stv.NJV < minExpData THEN Stop_Prog('Not enough experimental data points.', FALSE);
-    IF stv.NJV = maxExpData THEN Stop_Prog('It looks like the experimental JV file contains more points than I can handle.', FALSE);
+    IF stv.NJV < minExpData THEN Stop_Prog('Not enough experimental data points.', EC_InvalidInput, FALSE);
+    IF stv.NJV = maxExpData THEN Stop_Prog('It looks like the experimental JV file contains more points than I can handle.', EC_InvalidInput, FALSE);
 
     {now we can copy the arrays V and J into ExpJV}
     SetLength(JVExp, stv.NJV+1); {the regular voltages start at 1}
@@ -610,7 +610,7 @@ BEGIN {main program}
     IF hasCLoption('-h') THEN Display_Help_Exit(ProgName);
     Determine_Name_Parameter_File(parameterFile); {either default or user-specified file with all the parameters}
     IF hasCLoption('-tidy') THEN Tidy_Up_Parameter_File(parameterFile, TRUE); {tidy up file and exit}
-    IF NOT Correct_Version_Parameter_File(ProgName, parameterFile, version) THEN Stop_Prog('Version of SIMsalabim and '+parameterFile+' do not match.');
+    IF NOT Correct_Version_Parameter_File(ProgName, parameterFile, version) THEN Stop_Prog('Version of SIMsalabim and '+parameterFile+' do not match.', EC_DevParCorrupt);
 
     {Initialisation:}
     Read_Parameters(parameterFile, MsgStr, par, stv, ProgName); {Read parameters from input file}
@@ -675,10 +675,12 @@ BEGIN {main program}
 			FLUSH(log);
 			{now assess whether we accept the new solution, or skip it, or quit:}
 			CASE par.FailureMode OF
-				0 : Stop_Prog('Convergence failed at voltage = ' + FloatToStrF(new.Vint, ffGeneral,5,0)+ '. Maybe try smaller voltage steps?');
+				0 : Stop_Prog('Convergence failed at voltage = ' + FloatToStrF(new.Vint, ffGeneral,5,0)+ '. Maybe try smaller voltage steps?', EC_ConverenceFailedHalt);
 				1 : acceptNewSolution:=TRUE;
 				2 : acceptNewSolution:=(new.dti=0) {is true if steady-state, false otherwise}
-			END
+			END;
+			{if we get here, then conv=false, but we did not halt the program, so set the ExitCode:}
+			ExitCode:=EC_ConverenceFailedNotHalt
 		END;
 		
 		IF acceptNewSolution {OK, new solution is good (even if conv_main might be FALSE)}

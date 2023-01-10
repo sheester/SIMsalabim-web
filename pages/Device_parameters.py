@@ -47,21 +47,20 @@ else:
         """
         with st.spinner('SIMulating...'):
             result = run(['./simss', '../../' + output_path + id_session + '/' + 'device_parameters_' + id_session + '.txt'], cwd=simss_path, stdout=PIPE, check=False)
-        if result.returncode != 0 and result.returncode!=95:
-            # ToDo: add errorcode is 3 for early exits but not a failure, e.g. (auto)tidy
+        if result.returncode != 0 and result.returncode!=95 and result.returncode != 3:
             # SIMsalabim raised an error
             startMessage = False
             message = ''
             result_decode = result.stdout.decode('utf-8')
             if result.returncode >=100:
                 # A fatal (numerical) error occurred. Return errorcode and a standard error message.
-                message = 'A fatal error occurred.'
+                message = gf.fatal_error_message(result.returncode)
             else:
                 # Simsalabim raised an error. Read the console output for the details / error messaging. All lines after 'Program will be terminated, press enter.' are considered part of the error message
                 for line_console in result_decode.split('\n'):
                     if startMessage is True:
                         message = message + line_console + '\n'
-                    if 'Program will be terminated, press enter.' in line_console:
+                    if 'Program will be terminated.' in line_console:
                         startMessage = True
             # Show the message as an error on the screen. Do not continue to the simulation results page.
             st.error('Simulation raised an error with Errorcode: ' + str(result.returncode) +'\n\n'+ message)
@@ -75,12 +74,14 @@ else:
                 for line_console in result_decode.split('\n'):
                     if startMessage is True:
                         message = message + line_console + '\n'
-                    if 'Program will be terminated, press enter.' in line_console:
+                    if 'Program will be terminated.' in line_console:
                         startMessage = True
 
                 # Show the message as a success on the screen
                 st.success('Simulation completed but raised errorcode: ' + str(result.returncode) +'\n\n'+ 'The solution is accepted but not all points converged. \n\n' + message)
                 # ToDo specify the correct message based on the return message of simss
+            elif result.returncode ==3:
+                st.success('Action completed')
             else:
                 # Simulation completed as expected.
                 st.success('Simulation complete')

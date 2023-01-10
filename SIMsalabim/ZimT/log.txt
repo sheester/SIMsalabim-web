@@ -1,11 +1,11 @@
-Version 4.44
+Version 4.45
 Size of reals used in simulation: 10 bytes
-Timestamp at start: 9-12-22 16:03:03
+Timestamp at start: 10-1-23 15:31:18
 Values from command line:
 tj_file = .temp/tj0_file.dat
 Var_file = .temp/var0_file.dat
 Read parameters from device_parameters.txt
 Reading trap profile from traps.txt
 0 did not converge.
-Timestamp at end: 9-12-22 16:03:05
-Total run time:  1.730 seconds.
+Timestamp at end: 10-1-23 15:31:20
+Total run time:  1.861 seconds.

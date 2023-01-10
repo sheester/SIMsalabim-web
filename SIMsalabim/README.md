@@ -179,7 +179,9 @@ If you would like to would like to contribute to the SIMsalabim project or have 
 
 List of publications (not complete):
 
-- M. Koopmans and L.J.A. Koster, Voltage deficit in wide band gap perovskite solar cells: the role of traps, band energies, and effective density of states, Sol. RRL (accepted).
+- M. Koopmans and L.J.A. Koster, Voltage deficit in wide band gap perovskite solar cells: the role of traps, band energies, and effective density of states, Sol. RRL, 2200560 (2022).
+
+M. Koopmans, V.M. Le Corre, and L.J.A. Koster, SIMsalabim: An open-source drift-diffusion simulator for semiconductor devices, J. Open Source Softw. 7, 3727 (2022).
 
 - A. Rahimichatri, J. Liu, F. Jahani, L. Qiu, R.C. Chiechi, J.C. Hummelen, and L.J.A. Koster, A method for identifying the cause of inefficient salt-doping in organic semiconductors, J. Mater. Chem. C 10, 13093 (2022).
 

@@ -4,7 +4,7 @@
 
 {
 ZimT:a transient 1D drift-diffusion simulator 
-Copyright (c) 2020, 2021, 2022 Dr T.S. Sherkar, Dr V.M. Le Corre, M. Koopmans,
+Copyright (c) 2020, 2021, 2022, 2023 Dr T.S. Sherkar, Dr V.M. Le Corre, Dr M. Koopmans,
 F. Wobben, and Prof. Dr L.J.A. Koster, University of Groningen
 This source file is part of the SIMsalabim project.
 
@@ -58,7 +58,7 @@ USES {our own, generic ones:}
 
 CONST
     ProgName = TProgram.ZimT;  
-    version = '4.44';  
+    version = '4.45';  
 
 
 {first: check if the compiler is new enough, otherwise we can't check the version of the code}
@@ -117,7 +117,7 @@ BEGIN
 			IF old_tijd<>astate.tijd
 				THEN astate.dti:=1/(astate.tijd-old_tijd) {dti: inverse of time step}
 				ELSE astate.dti:=0; {old_tijd=tijd, so we're looking at steady-state, so infinite time step}
-			IF astate.dti<0 THEN Stop_Prog('Negative time steps are not allowed');
+			IF astate.dti<0 THEN Stop_Prog('Negative time steps are not allowed', EC_InvalidInput);
 			parstr:=Copy2SpaceDel(varline); {contains the second parameter}
 			IF LowerCase(parstr)='oc' {now check if we should simulate at open-circuit, or just at some specific value}
 			THEN SimOC:=TRUE
@@ -132,8 +132,8 @@ BEGIN
 				{therefore, for all simtypes, we simply set Vext=Vint for new:} 		
 				Vint:=Vext; 
 				{check if V is not too large or small:}
-				IF Vext*stv.Vti < -1.95 * LN(Max_Value_myReal) THEN Stop_Prog('V is too small.');
-				IF Vext*stv.Vti > 1.95 * LN(Max_Value_myReal) THEN Stop_Prog('V is too large.');
+				IF Vext*stv.Vti < -1.95 * LN(Max_Value_myReal) THEN Stop_Prog('V is too small.', EC_InvalidInput);
+				IF Vext*stv.Vti > 1.95 * LN(Max_Value_myReal) THEN Stop_Prog('V is too large.', EC_InvalidInput);
 			END;
 			parstr:=Copy2SpaceDel(varline); {contains the third parameter}
 
@@ -150,7 +150,7 @@ BEGIN
 		WRITELN('Error while reading from file ',par.tVG_file);
 		WRITELN('Offending line: ');
 		WRITELN(orgline);
-		Stop_Prog('See Reference Manual for details.');
+		Stop_Prog('See Reference Manual for details.', EC_InvalidInput);
 	END 
 END;
 
@@ -160,7 +160,7 @@ VAR foundHeader : BOOLEAN;
 BEGIN
 	{open input file with times, voltage and generation rate}
 	IF NOT FileExists(par.tVG_file) {the file with input par. is not found}
-        THEN Stop_Prog('Could not find file '+par.tVG_file);
+        THEN Stop_Prog('Could not find file '+par.tVG_file, EC_FileNotFound);
 	ASSIGN(inv, par.tVG_file);
 	RESET(inv);
 	
@@ -171,11 +171,11 @@ BEGIN
 		foundHeader:=LeftStr(DelWhite(dumstr),9) ='tVextGehp'; {cut relevant part of string}
 	UNTIL foundHeader OR EOF(inv);
 	
-	IF NOT foundHeader THEN Stop_Prog('Could not find correct header ''t Vext Gehp'' in ' + par.tVG_file + '.');
+	IF NOT foundHeader THEN Stop_Prog('Could not find correct header ''t Vext Gehp'' in ' + par.tVG_file + '.', EC_InvalidInput);
 	
 	{DelWhite removes all white spaces (incl. tabs, etc.) from a string, see myUtils}
 	Read_tVG(new, 0, inv, foundtVG); {try to read a line of t, Va, Gehp}
-	IF NOT(foundtVG) OR (new.tijd<>0) THEN Stop_Prog('tVG_file did not specify steady-state (t=0)');
+	IF NOT(foundtVG) OR (new.tijd<>0) THEN Stop_Prog('tVG_file did not specify steady-state (t=0)', EC_InvalidInput);
 	IF new.SimType=2 THEN new.SimType:=3; {both 2 and 3 are open-circuit, but 2 = S-S and 3 = transient. that doesn't matter and we take 3}
 END;
 
@@ -202,7 +202,7 @@ BEGIN
 					Residual_Current_Voltage:=new.Vext - VextTarget;	{what we should be calculating is the difference between the target Vext and the realised one}
 					new.Vext:=VextTarget; {restore Vext in state new}
 				END
-		ELSE Stop_Prog('Invalid case in function ResCurr');
+		ELSE Stop_Prog('Invalid case in function ResCurr', EC_ProgrammingError);
 	END; {case}
 END;
 
@@ -244,7 +244,7 @@ BEGIN
 		success:=ResJmin*ResJmax < 0
 	END;
 
-	IF NOT success THEN Stop_Prog('Could not find bracketing values for Vint at time ' + FloatToStrF(new.tijd, ffGeneral,10,0));
+	IF NOT success THEN Stop_Prog('Could not find bracketing values for Vint at time ' + FloatToStrF(new.tijd, ffGeneral,10,0), EC_NumericalFailure);
 END;
 
 BEGIN {main program}
@@ -254,7 +254,7 @@ BEGIN {main program}
     IF hasCLoption('-h') THEN Display_Help_Exit(ProgName);
     Determine_Name_Parameter_File(parameterFile); {either default or user-specified file with all the parameters}
     IF hasCLoption('-tidy') THEN Tidy_Up_Parameter_File(parameterFile, TRUE); {tidy up file and exit}
-    IF NOT Correct_Version_Parameter_File(ProgName, parameterFile, version) THEN Stop_Prog('Version of ZimT and '+parameterFile+' do not match.');
+    IF NOT Correct_Version_Parameter_File(ProgName, parameterFile, version) THEN Stop_Prog('Version of ZimT and '+parameterFile+' do not match.', EC_DevParCorrupt);
     
 {Initialisation:}
     Read_Parameters(parameterFile, MsgStr, par, stv, ProgName); {Read parameters from input file}
@@ -324,10 +324,12 @@ BEGIN {main program}
 			FLUSH(log);
 			{now assess whether we accept the new solution, or skip it, or quit:}
 			CASE par.FailureMode OF
-				0 : Stop_Prog('Convergence failed at time = ' + FloatToStrF(new.tijd, ffGeneral,10,0)+ '. Maybe try smaller time steps.');
+				0 : Stop_Prog('Convergence failed at time = ' + FloatToStrF(new.tijd, ffGeneral,10,0)+ '. Maybe try smaller time steps.', EC_ConverenceFailedHalt);
 				1 : acceptNewSolution:=TRUE;
 				2 : acceptNewSolution:=(new.dti=0) {is true if steady-state, false otherwise}
 			END;
+			{if we get here, then conv=false, but we did not halt the program, so set the ExitCode:}
+			ExitCode:=EC_ConverenceFailedNotHalt
 		END;
 
 		IF acceptNewSolution {OK, new solution is good (even if conv might be FALSE)}

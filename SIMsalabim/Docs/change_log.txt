@@ -1,3 +1,11 @@
+Version 4.45, 11 Jan 2023, LJAK
+
+1) Marten Koopmans is now Dr Marten Koopmans, so I've changed this throughout the codes.
+2) Defined exit codes (see unit TypesAndConstants) so that we can alert the outside world if something strange happens, like invalid input, numerical problems, etc. To do this, we pass the exit code to Stop_Prog.
+3) In Solve_Poisson, I have removed the updating of the densities (n, p, nion, pion) unless we're in steady-state (dti=0). In steady-state this coupling is fine and leads to correct results, but in the transient case it is not correct (essentially undoing part of what we did in version 4.35).
+
+
+
 Version 4.44, 9 Dec 2022, LJAK
 
 I have made it possible to specify a different device parameter file. The default file is defined in unit DDTypesAndConstants ('device_parameters.txt'), but one can specify a different parameter file via the command line:
