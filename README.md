@@ -1,5 +1,5 @@
 # plot-SIMsalabim
-A Streamlit app to visualize output data from the SIMsalabim drift-diffusion simulation program
+A Streamlit app to visualize output data from the SIMsalabim drift-diffusion simulation program ([Github SIMsalabim](https://github.com/kostergroup/SIMsalabim))
 
 # Installation instructions (Local - Linux)
 Prerequisites:
