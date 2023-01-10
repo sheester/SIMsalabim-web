@@ -1,8 +1,8 @@
 Version 4.44
-Size of reals used in simulation: 8 bytes
-Timestamp at start: 23-12-22 10:03:38
+Size of reals used in simulation: 10 bytes
+Timestamp at start: 10-1-23 15:30:27
 Values from command line:
-Read parameters from ../../Simulations/1671786009174176/device_parameters_1671786009174176.txt
+Read parameters from device_parameters.txt
 
 The following voltages will be simulated:
   i       V    UpdateIons   Store
@@ -38,5 +38,6 @@ The following voltages will be simulated:
  30     1.450    FALSE      TRUE
  31     1.500    FALSE      TRUE
 
-Timestamp at end: 23-12-22 10:03:39
-Total run time:  0.647 seconds.
+Reading generation profile from genProfile.txt
+Timestamp at end: 10-1-23 15:30:29
+Total run time:  1.362 seconds.

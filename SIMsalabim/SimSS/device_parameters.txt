@@ -65,7 +65,7 @@ ion_red_rate = 1         * ion redistribution rate, number of voltage steps afte
 **Generation and recombination******************************************************
 Gehp = 3.00e27           * m^-3 s^-1, average generation rate of electron-hole pairs
 Gfrac = 1                * fraction of Gmax used in solar cell
-Gen_profile = none       * name of file generation profile (or 'none')
+Gen_profile = genProfile.txt       * name of file generation profile (or 'none')
 Field_dep_G = 0          * field dependent generation yes (1) or no (0)
 P0 = 0.0                 * 0<=P0<1, fraction of quenched excitons that direcltly yield free carriers
 a = 1.0e-9               * m, charge separation distance, Braun model used

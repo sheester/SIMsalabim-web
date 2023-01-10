@@ -68,8 +68,9 @@ def plot_jv_curve(data, choice_voltage, plot_funcs, ax, exp, data_exp='' ):
     """
     plot_funcs(data['Vext'], data['Jext'], label='Simulated')
     ax.axvline(choice_voltage, color='k', linestyle='--')
-    ax.set_xlabel('V$\mathrm{_{ext}}$ [V]')
-    ax.set_ylabel('J$\mathrm{_{ext}}$ [Am$^{-2}$]')
+    ax.set_xlabel('$V_{ext}$ [V]')
+    ax.set_ylabel('$J_{ext}$ [Am$^{-2}$]')
+
     ax.set_title('Current-voltage characteristic')
     if exp is True:
         plot_funcs(data_exp['V'], data_exp['J'], label='Experimental')
@@ -107,7 +108,7 @@ def plot_potential(data_var, choice_voltage, plot_funcs, ax, color):
     """
     par = ['V']
     labels = ['V']
-    ax = create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax,'x [nm]','V [V]','linear', color)
+    ax = create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax,'$x$ [nm]','$V$ [V]','linear', color)
     ax.set_title('Potential')
     return ax
 
@@ -134,8 +135,8 @@ def plot_energy(data_var, choice_voltage, plot_funcs, ax, color):
         Updated Axes object for the plot
     """
     par = ['Evac','Ec', 'Ev', 'phin', 'phip']
-    labels = ['E$_{\mathrm{vac}}$','E$_{\mathrm{c}}$','E$_{\mathrm{v}}$','E$_{\mathrm{Fn}}$','E$_{\mathrm{Fp}}$']
-    ax = create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]','Energy level [eV]','linear', color)
+    labels = ['$E_{vac}$','$E_{c}$','$E_{v}$','$E_{Fn}$','$E_{Fp}$']
+    ax = create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, '$x$ [nm]','Energy level [eV]','linear', color)
     ax.set_title('Energy Band Diagram')
     return ax
 
@@ -162,8 +163,8 @@ def plot_carrier_densities(data_var, choice_voltage, plot_funcs, ax, color):
         Updated Axes object for the plot
     """
     par = ['n','p','nion','pion']
-    labels = ['n','p','n$_{\mathrm{ion}}$','p$_{\mathrm{ion}}$']
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Carrier density [ m$^{-3}$ ]','log',color)
+    labels = ['$n$','$p$','$n_{ion}$','$p_{ion}$']
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, '$x$ [nm]', 'Carrier density [m$^{-3}$]','log',color)
     ax.set_title('Carrier Densities')
     return ax
 
@@ -190,8 +191,8 @@ def plot_filling_levels(data_var, choice_voltage, plot_funcs, ax, color):
         Updated Axes object for the plot
     """
     par = ['ftb1','fti1']
-    labels = ['ft$_{\mathrm{b1}}$','ft$_{\mathrm{i1}}$']
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Filling of traps [ - ]','linear', color)
+    labels = ['$ft_{b1}$','$ft_{i1}$']
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, '$x$ [nm]', 'Filling of traps [ ]','linear', color)
     ax.set_title('Filling of traps')
     return ax
 
@@ -218,8 +219,8 @@ def plot_transport(data_var, choice_voltage, plot_funcs, ax, color):
         Updated Axes object for the plot
     """
     par = ['mun','mup']
-    labels = ['$\mathrm{\mu_{n}}$','$\mathrm{\mu_{p}}$']
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Mobility [ m$^{-2}$V$^{-1}$s$^{-1}$ ]','log', color)
+    labels = ['$\mu_{n}$','$\mu_{p}$']
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, '$x$ [nm]', 'Mobility [m$^{-2}$V$^{-1}$s$^{-1}$]','log', color)
     ax.set_title('Mobilities')
     return ax
 
@@ -246,8 +247,8 @@ def plot_generation_recombination(data_var, choice_voltage, plot_funcs, ax, colo
         Updated Axes object for the plot
     """
     par=['Gehp', 'Gfree', 'Rdir','BulkSRHn', 'BulkSRHp', 'IntSRHn', 'IntSRHp']
-    labels=['G$_{\mathrm{ehp}}$', 'G$_{\mathrm{free}}$', 'R$_{\mathrm{dir}}$', 'BulkSRH$_{\mathrm{n}}$', 'BulkSRH$_{\mathrm{p}}$', 'IntSRH$_{\mathrm{n}}$', 'IntSRH$_{\mathrm{p}}$']
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Generation/Recombination Rate [ m$^{-3}$s$^{-1}$ ]','linear', color)
+    labels=['$G_{ehp}$', '$G_{free}$', '$R_{dir}$', '$BulkSRH_{n}$', '$BulkSRH_{p}$', '$IntSRH_{n}$', '$IntSRH_{p}$']
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Generation/Recombination Rate [m$^{-3}$s$^{-1}$]','linear', color)
     ax.set_title('Generation and Recombination Rates')
     return ax
 
@@ -271,8 +272,8 @@ float
         Updated Axes object for the plot
     """
     par=['Jn','Jp','Jtot']
-    labels = ['J$_{\mathrm{n}}$', 'J$_{\mathrm{p}}$', 'J$_{\mathrm{tot}}$']
+    labels = ['$J_{n}$', '$J_{p}$', '$J_{tot}$']
 
-    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, 'x [nm]', 'Current density [Am$^{-2}$]','linear', color)
+    create_output_plot(data_var, choice_voltage, plot_funcs, par, labels, ax, '$x$ [nm]', 'Current density [Am$^{-2}$]','linear', color)
     ax.set_title('Current densities')
     return ax

@@ -46,17 +46,44 @@ else:
             When success, copy results, including zip to folder.
         """
         with st.spinner('SIMulating...'):
-            # Temp code to show console output on browser
-            result = run(['./simss', '../../' + output_path + id_session + '/' + 'device_parameters_' + id_session + '.txt'], cwd=simss_path, stdout=PIPE, check=True)
-
-            # console_decoded = result.stdout.decode('utf-8')
-        if result.returncode != 0:
-            # SIMsalabim raised an error, print the console output to the screen and exit.
+            result = run(['./simss', '../../' + output_path + id_session + '/' + 'device_parameters_' + id_session + '.txt'], cwd=simss_path, stdout=PIPE, check=False)
+        if result.returncode != 0 and result.returncode!=95:
+            # ToDo: add errorcode is 3 for early exits but not a failure, e.g. (auto)tidy
+            # SIMsalabim raised an error
+            startMessage = False
+            message = ''
             result_decode = result.stdout.decode('utf-8')
-            st.error('Errocode: ' + str(result.returncode) +'\n\n'+result_decode)
+            if result.returncode >=100:
+                # A fatal (numerical) error occurred. Return errorcode and a standard error message.
+                message = 'A fatal error occurred.'
+            else:
+                # Simsalabim raised an error. Read the console output for the details / error messaging. All lines after 'Program will be terminated, press enter.' are considered part of the error message
+                for line_console in result_decode.split('\n'):
+                    if startMessage is True:
+                        message = message + line_console + '\n'
+                    if 'Program will be terminated, press enter.' in line_console:
+                        startMessage = True
+            # Show the message as an error on the screen. Do not continue to the simulation results page.
+            st.error('Simulation raised an error with Errorcode: ' + str(result.returncode) +'\n\n'+ message)
         else:
             # SIMsalabim simulation succeeded
-            st.success('Simulation complete')
+            if result.returncode == 95:
+                # In case of errorcode 95, failures during the simulations were encountered but the simulation did not halt
+                startMessage = False
+                message = ''
+                result_decode = result.stdout.decode('utf-8')
+                for line_console in result_decode.split('\n'):
+                    if startMessage is True:
+                        message = message + line_console + '\n'
+                    if 'Program will be terminated, press enter.' in line_console:
+                        startMessage = True
+
+                # Show the message as a success on the screen
+                st.success('Simulation completed but raised errorcode: ' + str(result.returncode) +'\n\n'+ 'The solution is accepted but not all points converged. \n\n' + message)
+                # ToDo specify the correct message based on the return message of simss
+            else:
+                # Simulation completed as expected.
+                st.success('Simulation complete')
 
             # Read the console output.
             console_output_decoded = result.stdout.decode('utf-8')
