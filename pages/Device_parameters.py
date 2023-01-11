@@ -78,7 +78,7 @@ else:
                         startMessage = True
 
                 # Show the message as a success on the screen
-                st.success('Simulation completed but raised errorcode: ' + str(result.returncode) +'\n\n'+ 'The solution is accepted but not all points converged. \n\n' + message)
+                st.success('Simulation completed but raised errorcode: ' + str(result.returncode) +'\n\n'+ 'The simulation finished but at least 1 point did not converge. \n\n' + message)
                 # ToDo specify the correct message based on the return message of simss
             elif result.returncode ==3:
                 st.success('Action completed')
@@ -168,6 +168,10 @@ else:
             fp_device_parameters.write(par_file)
             fp_device_parameters.close()
 
+    def save_parameters_BD():
+        """Save the device parameters and draw the band diagram.
+        """        
+        save_parameters()
         # Draw the band diagram
         get_param_band_diagram(dev_par)
 
@@ -237,6 +241,35 @@ else:
         destination_file = open(target_path, "w", encoding='utf-8')
         destination_file.write(data)
         destination_file.close()
+
+        for item_output_par in dev_par[10]:
+            if 'UseExpData' in item_output_par[1]:
+                item_output_par[2]='1'
+            if 'ExpJV' in item_output_par[1]:
+                item_output_par[2]=uploaded_file.name
+        save_parameters()
+
+        return st.success('File upload complete')
+
+    def upload_gen_prof():
+        """ Read and decode the uploaded generation profile.
+        """
+        # Decode the uploaded file (utf-8)
+        data_gp = uploaded_file_gp.getvalue().decode('utf-8')
+
+        # Setup the write directory
+        target_path = simss_path + uploaded_file_gp.name
+
+        # Write the contents of the uploaded file to a file in the SimSS folder
+        destination_file_gp = open(target_path, "w", encoding='utf-8')
+        destination_file_gp.write(data_gp)
+        destination_file_gp.close()
+
+        for item_output_par in dev_par[6]:
+            if 'Gen_profile' in item_output_par[1]:
+                item_output_par[2]=uploaded_file_gp.name
+        save_parameters()
+
         return st.success('File upload complete')
 
     def upload_devpar():
@@ -312,7 +345,53 @@ else:
 
                 if chk_chars + chk_pattern + chk_filename == 0:
                     # All checks passed, allow upload
-                    st.button("Upload file to SimSS", on_click=upload_exp_jv)
+                    st.button("Upload file to SimSS", key='exp_jv', on_click=upload_exp_jv)
+                    st.markdown('<hr>', unsafe_allow_html=True)
+                else:
+                    # One or more checks failed. Do not allow upload and show error message
+                    st.error(msg_chars + msg_pattern + msg_filename)
+                    st.markdown('<hr>', unsafe_allow_html=True)
+
+    with st.sidebar:
+        # Functionality to upload an experimental JV curve
+        chk_genProfile = st.checkbox("Upload generation profile")
+        if chk_genProfile:
+            uploaded_file_gp = st.file_uploader("Select generation profile",type=['txt'], accept_multiple_files=False, label_visibility='collapsed')
+            if uploaded_file_gp is not None:
+                bytes_date_gp = uploaded_file_gp.getvalue()
+                data_gp = uploaded_file_gp.getvalue().decode('utf-8')
+                # validation of the uploaded file: 
+                # - Illegal characters
+                # - File pattern
+                # - Filename length
+                msg = ''
+                chk_chars = 0
+                msg_chars = ''
+                chk_pattern = 0
+                msg_pattern = ''
+                chk_filename = 0
+                msg_filename = ''
+                # Illegal characters
+                if '=' in data_gp or '+' in data_gp or '@' in data_gp or '0x09' in data_gp or '0x0D' in data_gp:
+                    chk_chars = 1
+                    msg_chars = "Illegal characters used. \n"
+                # File pattern
+                data_gp = data_gp.splitlines()
+                pattern = re.compile("^-?\d*(\.\d*)?\s+-?\d*(\.\d*)?$")
+                for line in data_gp:
+                    if not pattern.match(line):
+                        chk_pattern = 1
+                        msg_pattern = 'File content does not meet the required pattern. \n'
+                # Filename lengthand secure the filename.       
+                file_name = secure_filename(uploaded_file_gp.name)
+                if len(file_name) > 50:
+                    print('filename too long. Max 50 characters')
+                    chk_filename = 1
+                    msg_filename = 'Filename is too long. Max 50 characters'
+
+                if chk_chars + chk_pattern + chk_filename == 0:
+                    # All checks passed, allow upload
+                    st.button("Upload file to SimSS", key='gen_prof', on_click=upload_gen_prof)
                     st.markdown('<hr>', unsafe_allow_html=True)
                 else:
                     # One or more checks failed. Do not allow upload and show error message
@@ -350,7 +429,7 @@ else:
 
     with st.sidebar:
         # Device Parameter buttons
-        st.button('Save device parameters', on_click=save_parameters)
+        st.button('Save device parameters', on_click=save_parameters_BD)
         if os.path.isfile(output_path + id_session + '/' + 'device_parameters_' + id_session + '.txt'):
             with open(output_path + id_session + '/' +'device_parameters_' + id_session + '.txt', encoding='utf-8') as fo:
                 st.download_button('Download device parameters', fo, file_name='device_parameters_' + id_session + '.txt')

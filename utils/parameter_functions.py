@@ -152,6 +152,7 @@ def read_comment_line(line, index):
         When a left adjusted comment is encountered that does not match a section name or is not a starting comment/description,
         set the changes parameter to True to indicate that the comment must be added to the current section (via the index)
 
+        Note: Do not modify the indices and order of the section names!
     Parameters
     ----------
     line : string

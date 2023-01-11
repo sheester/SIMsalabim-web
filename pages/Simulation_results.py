@@ -32,7 +32,10 @@ else:
             st.error('No data available. SIMsalabim simulation did not run yet or the device parameters have been changed. Run the simulation first.')
         else:
             data_var = pd.read_csv(output_path+'Var_' + id_session + '.dat', delim_whitespace=True)
-            data_jv = pd.read_csv(output_path+'JV_' + id_session + '.dat', delim_whitespace=True)
+            if os.path.getsize(output_path+'JV_' + id_session + '.dat') != 0:
+                data_jv = pd.read_csv(output_path+'JV_' + id_session + '.dat', delim_whitespace=True)
+            else:
+                data_jv = pd.DataFrame([],columns=[ 'Vext', 'Jext', 'convIndex', 'P', 'Jphoto', 'Jdir', 'JBulkSRH', 'JIntLeft', 'JIntRight', 'JminLeft', 'JminRight', 'JShunt'])
 
             # Increase the font of pyplot graphs for readability
             font = {'size' : 14}
